@@ -1,2 +1,0 @@
-[console_scripts]
-tcr-open-data = tcr_open_data.cli:main
