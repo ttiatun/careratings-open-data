@@ -276,9 +276,11 @@ def reharmonize_snapshot(con: duckdb.DuckDBPyConnection, raw_parquet: Path, tabl
 def process_snapshot(snapshot: Snapshot, history_dir: Path, tables: list[str], con: duckdb.DuckDBPyConnection,
                      zip_opener=None) -> list[dict]:
     """Extract the wanted members of one snapshot zip and write raw + harmonized Parquet. Returns coverage rows."""
-    from remotezip import RemoteZip  # imported lazily so tests can inject a local zip opener
+    if zip_opener is None:
+        from remotezip import RemoteZip  # imported only when reading the CMS archive over HTTP
 
-    opener = zip_opener or (lambda url: RemoteZip(url))
+        zip_opener = lambda url: RemoteZip(url)  # noqa: E731
+    opener = zip_opener
     coverage: list[dict] = []
     with opener(snapshot.url) as zf:
         names = [i.filename for i in zf.infolist()]
