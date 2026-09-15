@@ -2,9 +2,9 @@
 
 All notable changes to the build and to the release format. Data releases are listed by name; the CMS files behind each one are recorded in that release's `manifest.json`.
 
-## v2026.08 (internal, built September 14, 2026)
+## v2026.08 (built September 14, 2026; published September 15, 2026)
 
-First release built by `tcr-open-data` 0.1.0.
+First release built by `tcr-open-data` 0.1.0. Archived at Zenodo: DOI 10.5281/zenodo.22780105 (concept DOI 10.5281/zenodo.22780104). Served from https://data.thecareratings.com/releases/v2026.08/.
 
 - Sources: Care Compare Provider Information, Penalties and Ownership (August 2026); PECOS Skilled Nursing Facility Enrollments and All Owners (July 31, 2026); Change of Ownership (July 17, 2026); Nursing Home Chain Performance Measures (September 9, 2026).
 - Tables: `facilities`, `penalties`, `owners_carecompare`, `owners_pecos`, `changes_of_ownership`, `chains`, `state_summary`, `crosswalk`, each as CSV and Parquet.

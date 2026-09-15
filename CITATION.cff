@@ -7,6 +7,11 @@ authors:
     website: "https://thecareratings.com/"
 repository-code: "https://github.com/ttiatun/careratings-open-data"
 url: "https://thecareratings.com/data/"
+doi: 10.5281/zenodo.22780104
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.22780104
+    description: "Concept DOI for all releases; each release has its own version DOI (v2026.08: 10.5281/zenodo.22780105)"
 license: "CC-BY-4.0"
 keywords:
   - nursing homes

@@ -79,6 +79,6 @@ The ownership disclosure flags are the facility's own answers on Form CMS-855A. 
 
 > The Care Ratings (2026). Open Nursing Home Data, release v2026.08 (CMS August 2026 vintage). Built from Centers for Medicare & Medicaid Services public files. https://thecareratings.com/data/releases/v2026.08/
 
-Each release also carries a DOI once it is archived at Zenodo; the release page and its `manifest.json` list it. More formats: <https://thecareratings.com/data/cite/>.
+Every release is archived at Zenodo under the concept DOI [10.5281/zenodo.22780104](https://doi.org/10.5281/zenodo.22780104); each release has its own version DOI (v2026.08: [10.5281/zenodo.22780105](https://doi.org/10.5281/zenodo.22780105)), listed on the release page and in its `manifest.json`. More formats: <https://thecareratings.com/data/cite/>.
 
 A machine-readable citation is in [CITATION.cff](CITATION.cff).
