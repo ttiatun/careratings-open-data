@@ -129,7 +129,7 @@ def test_resolve_ccns_by_name_then_unique_zip(tmp_path: Path):
         {"ccn": None, "facility_name": "Grove At North Huntingdon, The", "state": "PA", "zip_code": "15642"},
     ]
     counts = resolve_ccns(rows, parquet)
-    assert counts == {"printed": 1, "name_state_zip": 1, "state_zip_unique": 1, "unmatched": 1}
+    assert counts == {"printed": 1, "name_state_zip": 1, "state_zip_unique": 1, "state_zip_name_similar": 1, "unmatched": 0}
     assert rows[1]["ccn"] == "035123" and rows[1]["ccn_match"] == "name_state_zip"
-    assert rows[2]["ccn"] is None and rows[2]["ccn_match"] == "unmatched", "two facilities share the ZIP and the name does not match"
+    assert rows[2]["ccn"] == "205050" and rows[2]["ccn_match"] == "state_zip_name_similar", "two facilities share the ZIP; the abbreviated name still points at one"
     assert rows[3]["ccn"] == "395555" and rows[3]["ccn_match"] == "state_zip_unique"

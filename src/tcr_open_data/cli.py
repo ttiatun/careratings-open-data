@@ -26,7 +26,7 @@ from .codebook import render_codebook
 from .download import download_all, load_sources_json
 from .history import backfill, consolidate, list_snapshots, reharmonize
 from .manifest import write_release_manifest
-from .sff import build_sff_history, fetch_capture, list_captures
+from .sff import Capture, build_sff_history, fetch_capture, list_captures
 from .storage import R2Config, publish, publish_history
 from .validate import validate_release
 
@@ -138,10 +138,16 @@ def cmd_reharmonize(args: argparse.Namespace) -> int:
 
 
 def cmd_sff_history(args: argparse.Namespace) -> int:
-    captures = list_captures()
+    history = Path(args.out)
+    listing = history / "sff" / "captures.json"
+    if args.cached_listing and listing.exists():
+        captures = [Capture(**c) for c in json.loads(listing.read_text(encoding="utf-8"))]
+    else:
+        captures = list_captures()
+        listing.parent.mkdir(parents=True, exist_ok=True)
+        listing.write_text(json.dumps([c.__dict__ for c in captures], indent=1), encoding="utf-8")
     if args.limit:
         captures = captures[-args.limit:]
-    history = Path(args.out)
 
     def fetch(capture, cache_dir, session):
         return fetch_capture(capture, cache_dir, session, retries=args.retries, pause=args.pause)
@@ -221,6 +227,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--limit", type=int, default=None, help="Only the newest N captures")
     p.add_argument("--retries", type=int, default=5, help="Attempts per capture before recording it as unavailable")
     p.add_argument("--pause", type=float, default=2.0, help="Seconds to wait between downloads (the Internet Archive throttles bursts)")
+    p.add_argument("--cached-listing", action="store_true", help="Reuse history/sff/captures.json instead of querying the CDX index again")
     p.set_defaults(func=cmd_sff_history)
 
     p = sub.add_parser("publish-history", help="Upload the history store to R2 under history/ (dry run unless --live)")

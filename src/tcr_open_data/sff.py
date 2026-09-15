@@ -168,12 +168,40 @@ def glue_lines(raw: list[str]) -> list[str]:
     return lines
 
 
+SPLIT_CAPITAL = re.compile(r"\b([A-Z]) (?=[a-z]{2,}\b)")
+
+
+def collapse_layout_line(line: str) -> str:
+    """Layout-mode text keeps column spacing and sometimes splits a word after its capital ("W oodley"); undo both."""
+    return SPLIT_CAPITAL.sub(r"\1", re.sub(r"\s{2,}", " ", line.translate(DASHES)).strip())
+
+
+def _page_lines(page, layout: bool) -> list[str]:
+    text = (page.extract_text(extraction_mode="layout") if layout else page.extract_text()) or ""
+    if layout:
+        raw = [collapse_layout_line(l) for l in text.splitlines() if l.strip()]
+    else:
+        raw = [l.translate(DASHES).rstrip() for l in text.splitlines() if l.strip()]
+    return glue_lines(raw)
+
+
 def pdf_pages(path: Path) -> list[list[str]]:
-    """Non-empty text lines per page."""
+    """Non-empty text lines per page. Pages that pypdf reads column by column (2015-2018 editions: every name, then
+    every address, ...) carry a table label but no row-shaped line; those are re-extracted in layout mode, which
+    keeps each printed row on one line."""
     from pypdf import PdfReader
 
     reader = PdfReader(str(path))
-    return [glue_lines([l.translate(DASHES).rstrip() for l in (page.extract_text() or "").splitlines() if l.strip()]) for page in reader.pages]
+    pages: list[list[str]] = []
+    for page in reader.pages:
+        lines = _page_lines(page, layout=False)
+        rows = sum(1 for l in lines if _match_row(l))
+        if rows < 3 and len(lines) >= 8 and any(TABLE_LABEL.match(l) for l in lines):
+            alternative = _page_lines(page, layout=True)
+            if sum(1 for l in alternative if _match_row(l)) > rows:
+                lines = alternative
+        pages.append(lines)
+    return pages
 
 
 def pdf_lines(path: Path) -> list[str]:
@@ -270,34 +298,66 @@ def normalize_name(name: str | None) -> str:
     return re.sub(r"\s+", " ", re.sub(r"[^A-Z0-9 ]+", " ", (name or "").upper())).strip()
 
 
+NAME_STOPWORDS = {"THE", "OF", "AND", "AT", "LLC", "INC", "LP", "LTD", "CENTER", "CTR", "CENTRE", "CARE", "HEALTH", "HEALTHCARE",
+                  "NURSING", "HOME", "REHABILITATION", "REHAB", "SKILLED", "FACILITY", "LIVING", "SENIOR", "COMMUNITY", "SERVICES"}
+
+
+def name_tokens(name: str | None) -> set[str]:
+    return {t for t in normalize_name(name).split() if t not in NAME_STOPWORDS}
+
+
+def similar_name(name: str | None, candidates: dict[str, set[str]], threshold: float = 0.5) -> str | None:
+    """The single candidate CCN whose distinctive name tokens overlap the row's best (Jaccard >= threshold); None on ties."""
+    tokens = name_tokens(name)
+    if not tokens:
+        return None
+    scored: list[tuple[float, str]] = []
+    for ccn, names in candidates.items():
+        best = 0.0
+        for candidate in names:
+            other = name_tokens(candidate)
+            if other:
+                best = max(best, len(tokens & other) / len(tokens | other))
+        scored.append((best, ccn))
+    scored.sort(reverse=True)
+    if scored and scored[0][0] >= threshold and (len(scored) == 1 or scored[1][0] < scored[0][0]):
+        return scored[0][1]
+    return None
+
+
+MATCH_METHODS = ("printed", "name_state_zip", "state_zip_unique", "state_zip_name_similar", "unmatched")
+
+
 def resolve_ccns(rows: list[dict], facilities_parquet: Path) -> dict:
-    """Fill ccn for rows without a printed CCN using facilities_history (name + state + ZIP, then unique state + ZIP)."""
+    """Fill ccn for rows without a printed CCN using facilities_history: exact normalized name + state + ZIP, then the
+    only facility in that state + ZIP, then the clearly most similar name within that state + ZIP."""
     import duckdb
 
     con = duckdb.connect()
     path = facilities_parquet.resolve().as_posix().replace("'", "''")
     by_name: dict[tuple[str, str, str], set[str]] = {}
-    by_zip: dict[tuple[str, str], set[str]] = {}
+    by_zip: dict[tuple[str, str], dict[str, set[str]]] = {}
     for ccn, name, state, zip_code in con.execute(
             f"SELECT DISTINCT ccn, provider_name, state, left(zip_code, 5) FROM read_parquet('{path}') WHERE ccn IS NOT NULL AND state IS NOT NULL").fetchall():
         by_name.setdefault((normalize_name(name), state, zip_code or ""), set()).add(ccn)
-        by_zip.setdefault((state, zip_code or ""), set()).add(ccn)
+        by_zip.setdefault((state, zip_code or ""), {}).setdefault(ccn, set()).add(name or "")
     con.close()
-    counts = {"printed": 0, "name_state_zip": 0, "state_zip_unique": 0, "unmatched": 0}
+    counts = {m: 0 for m in MATCH_METHODS}
     for row in rows:
         if row.get("ccn"):
             row["ccn_match"] = "printed"
         else:
             key = (normalize_name(row.get("facility_name")), row.get("state") or "", (row.get("zip_code") or "")[:5])
-            hits = by_name.get(key, set())
-            if len(hits) == 1:
-                row["ccn"], row["ccn_match"] = next(iter(hits)), "name_state_zip"
+            exact = by_name.get(key, set())
+            in_zip = by_zip.get(key[1:], {})
+            if len(exact) == 1:
+                row["ccn"], row["ccn_match"] = next(iter(exact)), "name_state_zip"
+            elif len(in_zip) == 1:
+                row["ccn"], row["ccn_match"] = next(iter(in_zip)), "state_zip_unique"
+            elif (similar := similar_name(row.get("facility_name"), in_zip)) is not None:
+                row["ccn"], row["ccn_match"] = similar, "state_zip_name_similar"
             else:
-                hits = by_zip.get(key[1:], set())
-                if len(hits) == 1:
-                    row["ccn"], row["ccn_match"] = next(iter(hits)), "state_zip_unique"
-                else:
-                    row["ccn_match"] = "unmatched"
+                row["ccn_match"] = "unmatched"
         counts[row["ccn_match"]] += 1
     return counts
 
