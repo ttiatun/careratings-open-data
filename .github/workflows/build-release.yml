@@ -1,0 +1,59 @@
+name: Build release
+
+on:
+  # CMS refreshes Care Compare around the start of each month; the build names
+  # the release after the Provider Information processing date, and publishing
+  # the same release twice simply overwrites it with identical files.
+  schedule:
+    - cron: "0 12 3 * *"
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Upload to the research store (needs the TCR_R2_* secrets)"
+        type: choice
+        options: ["false", "true"]
+        default: "false"
+      strict:
+        description: "Treat reconciliation warnings as failures"
+        type: choice
+        options: ["false", "true"]
+        default: "false"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install --upgrade pip && pip install -e . pytest
+      - run: pytest -q
+
+      - name: Download, build, validate
+        id: build
+        run: |
+          FLAGS=""
+          if [ "${{ inputs.strict }}" = "true" ]; then FLAGS="$FLAGS --strict"; fi
+          python -m tcr_open_data.cli release $FLAGS | tee build-output.json
+          echo "release=$(python -c "import json,sys; print(json.load(open('build-output.json'))['release'])")" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to the research store
+        if: inputs.publish == 'true' || github.event_name == 'schedule'
+        env:
+          TCR_R2_ACCOUNT_ID: ${{ secrets.TCR_R2_ACCOUNT_ID }}
+          TCR_R2_ACCESS_KEY_ID: ${{ secrets.TCR_R2_ACCESS_KEY_ID }}
+          TCR_R2_SECRET_ACCESS_KEY: ${{ secrets.TCR_R2_SECRET_ACCESS_KEY }}
+          TCR_R2_BUCKET: ${{ vars.TCR_R2_BUCKET || 'careratings-open-data' }}
+        run: |
+          if [ -z "$TCR_R2_ACCOUNT_ID" ]; then echo "R2 secrets not configured; skipping publish"; exit 0; fi
+          python -m tcr_open_data.cli publish --release "releases/${{ steps.build.outputs.release }}" --raw "raw/${{ steps.build.outputs.release }}" --live
+
+      - name: Keep the release as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.build.outputs.release }}
+          path: releases/${{ steps.build.outputs.release }}
+          retention-days: 90

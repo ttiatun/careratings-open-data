@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this data, please cite it as below and name the release you used."
+title: "The Care Ratings Open Nursing Home Data"
+type: dataset
+authors:
+  - name: "The Care Ratings"
+    website: "https://thecareratings.com/"
+repository-code: "https://github.com/ttiatun/careratings-open-data"
+url: "https://thecareratings.com/data/"
+license: "CC-BY-4.0"
+keywords:
+  - nursing homes
+  - CMS Care Compare
+  - PECOS ownership
+  - private equity
+  - REIT
+  - staffing
+  - civil money penalties
+abstract: >-
+  Monthly, versioned, facility-level releases of U.S. nursing home data built
+  from Centers for Medicare & Medicaid Services public files: Care Compare
+  provider information, penalties and ownership, PECOS enrollments, owners and
+  changes of ownership, and chain performance measures. Every column is tagged
+  with its provenance; derived columns are documented in the codebook and
+  methodology.
