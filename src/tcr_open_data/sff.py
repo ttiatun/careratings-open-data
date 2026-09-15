@@ -53,6 +53,12 @@ ROW_CCN = re.compile(r"^\s*(?P<ccn>\d{6})\s+(?P<body>.+?)" + ROW_TAIL % "?")
 ROW_NOCCN = re.compile(r"^\s*(?P<body>.+?)" + ROW_TAIL % "")
 STREET = re.compile(r"^(?P<name>.*?)\s+(?P<address>(?:\d[\w-]*|P\.?\s?O\.?\s+Box)\s+.*)$", re.IGNORECASE)
 RETRY_STATUS = {429, 500, 502, 503, 504}
+DASHES = str.maketrans({c: "-" for c in "\u2010\u2011\u2012\u2013\u2014\u2015\u2212"})
+
+
+def is_complete_pdf(data: bytes) -> bool:
+    """A PDF starts with %PDF and ends with an EOF marker; a download cut off by the archive has no marker."""
+    return data.startswith(b"%PDF") and b"%%EOF" in data[-2048:]
 
 
 @dataclass
@@ -120,7 +126,7 @@ def fetch_capture(capture: Capture, cache_dir: Path, session: requests.Session |
     """Download the original bytes of a capture into the cache (idempotent), backing off on throttling and dropped connections."""
     cache_dir.mkdir(parents=True, exist_ok=True)
     target = cache_dir / f"SFFList_{capture.timestamp}.pdf"
-    if target.exists() and target.stat().st_size > 0:
+    if target.exists() and is_complete_pdf(target.read_bytes()):
         return target
     session = _session(session)
     delay = max(pause, 1.0)
@@ -131,8 +137,8 @@ def fetch_capture(capture: Capture, cache_dir: Path, session: requests.Session |
             if response.status_code in RETRY_STATUS:
                 raise requests.HTTPError(f"{response.status_code} from web.archive.org", response=response)
             response.raise_for_status()
-            if not response.content.startswith(b"%PDF"):
-                raise ValueError("capture is not a PDF")
+            if not is_complete_pdf(response.content):
+                raise ValueError("capture is not a complete PDF" if response.content.startswith(b"%PDF") else "capture is not a PDF")
             target.write_bytes(response.content)
             if pause:
                 sleep(pause)
@@ -167,7 +173,7 @@ def pdf_pages(path: Path) -> list[list[str]]:
     from pypdf import PdfReader
 
     reader = PdfReader(str(path))
-    return [glue_lines([l.rstrip() for l in (page.extract_text() or "").splitlines() if l.strip()]) for page in reader.pages]
+    return [glue_lines([l.translate(DASHES).rstrip() for l in (page.extract_text() or "").splitlines() if l.strip()]) for page in reader.pages]
 
 
 def pdf_lines(path: Path) -> list[str]:
