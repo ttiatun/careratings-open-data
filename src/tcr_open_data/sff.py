@@ -56,9 +56,22 @@ RETRY_STATUS = {429, 500, 502, 503, 504}
 DASHES = str.maketrans({c: "-" for c in "\u2010\u2011\u2012\u2013\u2014\u2015\u2212"})
 
 
+CRAWL_CAP = 1_048_576
+
+
 def is_complete_pdf(data: bytes) -> bool:
-    """A PDF starts with %PDF and ends with an EOF marker; a download cut off by the archive has no marker."""
+    """A PDF starts with %PDF and ends with an EOF marker; a download cut off has no marker at the end."""
     return data.startswith(b"%PDF") and b"%%EOF" in data[-2048:]
+
+
+def is_readable_pdf(data: bytes) -> bool:
+    """A cut-off PDF can still carry a complete cross-reference section (incremental updates, linearized files)."""
+    return data.startswith(b"%PDF") and b"%%EOF" in data
+
+
+def looks_truncated(data: bytes) -> bool:
+    """The Internet Archive crawlers cap some captures at exactly 1 MiB; those and files without a final EOF are flagged."""
+    return len(data) % CRAWL_CAP == 0 or not is_complete_pdf(data)
 
 
 @dataclass
@@ -123,23 +136,31 @@ def list_captures(session: requests.Session | None = None, cdx_json: list | None
 
 def fetch_capture(capture: Capture, cache_dir: Path, session: requests.Session | None = None,
                   retries: int = 5, pause: float = 2.0, sleep=time.sleep) -> Path:
-    """Download the original bytes of a capture into the cache (idempotent), backing off on throttling and dropped connections."""
+    """Download the original bytes of a capture into the cache (idempotent), backing off on throttling and dropped
+    connections. When every attempt returns the same cut-off file, the archive itself holds a truncated copy: the
+    bytes are kept beside a `.truncated` marker so later runs do not fetch them again."""
     cache_dir.mkdir(parents=True, exist_ok=True)
     target = cache_dir / f"SFFList_{capture.timestamp}.pdf"
-    if target.exists() and is_complete_pdf(target.read_bytes()):
+    marker = target.with_suffix(".truncated")
+    if target.exists() and target.stat().st_size > 0 and (is_complete_pdf(target.read_bytes()) or marker.exists()):
         return target
     session = _session(session)
     delay = max(pause, 1.0)
     last: Exception | None = None
+    partial: bytes | None = None
     for attempt in range(retries):
         try:
             response = session.get(capture.url, timeout=300)
             if response.status_code in RETRY_STATUS:
                 raise requests.HTTPError(f"{response.status_code} from web.archive.org", response=response)
             response.raise_for_status()
+            if not response.content.startswith(b"%PDF"):
+                raise ValueError("capture is not a PDF")
             if not is_complete_pdf(response.content):
-                raise ValueError("capture is not a complete PDF" if response.content.startswith(b"%PDF") else "capture is not a PDF")
+                partial = response.content
+                raise ValueError("capture is not a complete PDF")
             target.write_bytes(response.content)
+            marker.unlink(missing_ok=True)
             if pause:
                 sleep(pause)
             return target
@@ -148,6 +169,10 @@ def fetch_capture(capture: Capture, cache_dir: Path, session: requests.Session |
             if attempt + 1 < retries:
                 sleep(delay)
                 delay = min(delay * 3, 300)
+    if partial is not None:
+        target.write_bytes(partial)
+        marker.write_text(f"{len(partial)} bytes; the archived copy has no final %%EOF", encoding="utf-8")
+        return target
     raise RuntimeError(f"gave up after {retries} attempts: {type(last).__name__}: {str(last)[:160]}")
 
 
@@ -364,7 +389,7 @@ def resolve_ccns(rows: list[dict], facilities_parquet: Path) -> dict:
 
 ROW_COLUMNS = ["capture_timestamp", "captured_at", "edition_date", "table_code", "table_title", "ccn", "ccn_match", "facility_name", "address_city",
                "state", "zip_code", "phone", "most_recent_inspection", "met_survey_criteria", "months_as_sff", "source_url"]
-EDITION_COLUMNS = ["capture_timestamp", "captured_at", "edition_date", "layout", "pages", "row_count", "tables", "sha256", "duplicate_of_previous", "error"]
+EDITION_COLUMNS = ["capture_timestamp", "captured_at", "edition_date", "layout", "pages", "row_count", "tables", "sha256", "duplicate_of_previous", "truncated", "error"]
 
 
 def _csv_columns(columns: list[str]) -> str:
@@ -386,28 +411,32 @@ def build_sff_history(captures: list[Capture], history_dir: Path, session: reque
         except Exception as exc:  # noqa: BLE001
             progress(f"{capture.timestamp}: fetch failed {type(exc).__name__}: {str(exc)[:120]}")
             editions.append({"capture_timestamp": capture.timestamp, "captured_at": capture.captured_at, "edition_date": None, "layout": "unavailable",
-                             "pages": 0, "row_count": 0, "tables": "", "sha256": None, "duplicate_of_previous": False, "error": f"{type(exc).__name__}: {str(exc)[:200]}"})
+                             "pages": 0, "row_count": 0, "tables": "", "sha256": None, "duplicate_of_previous": False, "truncated": False,
+                             "error": f"{type(exc).__name__}: {str(exc)[:200]}"})
             continue
-        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        data = path.read_bytes()
+        digest = hashlib.sha256(data).hexdigest()
         duplicate = digest in seen_digest
         seen_digest.add(digest)
+        truncated = looks_truncated(data)
         try:
             pages = pdf_pages(path)
             parsed = parse_pages(pages)
         except Exception as exc:  # noqa: BLE001
             progress(f"{capture.timestamp}: parse failed {type(exc).__name__}")
             editions.append({"capture_timestamp": capture.timestamp, "captured_at": capture.captured_at, "edition_date": None, "layout": "unreadable",
-                             "pages": 0, "row_count": 0, "tables": "", "sha256": digest, "duplicate_of_previous": duplicate, "error": f"{type(exc).__name__}: {str(exc)[:200]}"})
+                             "pages": 0, "row_count": 0, "tables": "", "sha256": digest, "duplicate_of_previous": duplicate, "truncated": truncated,
+                             "error": f"{type(exc).__name__}: {str(exc)[:200]}"})
             continue
         editions.append({"capture_timestamp": capture.timestamp, "captured_at": capture.captured_at, "edition_date": parsed.edition_date,
                          "layout": parsed.layout, "pages": len(pages), "row_count": len(parsed.rows),
                          "tables": ";".join(f"{k}={v}" for k, v in sorted(parsed.tables.items())), "sha256": digest,
-                         "duplicate_of_previous": duplicate, "error": ""})
+                         "duplicate_of_previous": duplicate, "truncated": truncated, "error": ""})
         if not duplicate:
             for r in parsed.rows:
                 rows.append({"capture_timestamp": capture.timestamp, "captured_at": capture.captured_at, "edition_date": parsed.edition_date, **r,
                              "source_url": capture.url})
-        progress(f"{capture.timestamp}: {parsed.layout} edition {parsed.edition_date} rows={len(parsed.rows)}{' (duplicate)' if duplicate else ''}")
+        progress(f"{capture.timestamp}: {parsed.layout} edition {parsed.edition_date} rows={len(parsed.rows)}{' (duplicate)' if duplicate else ''}{' (truncated capture)' if truncated else ''}")
 
     ccn_matches = None
     if facilities_parquet is not None and facilities_parquet.exists():
@@ -428,7 +457,7 @@ def build_sff_history(captures: list[Capture], history_dir: Path, session: reque
                     TO '{q(history_dir / 'sff_history.parquet')}' (FORMAT PARQUET, COMPRESSION ZSTD)""")
     con.execute(f"""COPY (SELECT capture_timestamp, CAST(captured_at AS DATE) AS captured_at, TRY_CAST(edition_date AS DATE) AS edition_date, layout,
                     TRY_CAST(pages AS INTEGER) AS pages, TRY_CAST(row_count AS INTEGER) AS row_count, tables, sha256,
-                    TRY_CAST(duplicate_of_previous AS BOOLEAN) AS duplicate_of_previous, error
+                    TRY_CAST(duplicate_of_previous AS BOOLEAN) AS duplicate_of_previous, TRY_CAST(truncated AS BOOLEAN) AS truncated, error
                     FROM read_csv('{q(editions_csv)}', header=true, columns={_csv_columns(EDITION_COLUMNS)}))
                     TO '{q(history_dir / 'sff_editions.parquet')}' (FORMAT PARQUET)""")
     con.close()
@@ -438,7 +467,8 @@ def build_sff_history(captures: list[Capture], history_dir: Path, session: reque
         "source": SFF_URL, "captures": len(captures),
         "editions": {"rows_layout": sum(1 for e in editions if e["layout"] == "rows"), "rows_no_ccn_layout": sum(1 for e in editions if e["layout"] == "rows_no_ccn"),
                      "legacy_layout": sum(1 for e in editions if e["layout"] == "legacy"),
-                     "unavailable": sum(1 for e in editions if e["layout"] in ("unavailable", "unreadable")), "duplicates": sum(1 for e in editions if e["duplicate_of_previous"])},
+                     "unavailable": sum(1 for e in editions if e["layout"] in ("unavailable", "unreadable")), "duplicates": sum(1 for e in editions if e["duplicate_of_previous"]),
+                     "truncated_captures": sum(1 for e in editions if e.get("truncated"))},
         "rows": len(rows), "ccn_matches": ccn_matches,
         "first_parsed_edition": min((e["edition_date"] for e in editions if e["layout"] in parsed_layouts and e["edition_date"]), default=None),
         "last_parsed_edition": max((e["edition_date"] for e in editions if e["layout"] in parsed_layouts and e["edition_date"]), default=None),
