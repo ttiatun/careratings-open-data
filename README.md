@@ -21,7 +21,7 @@ Every column is tagged with its provenance (`cms` or `tcr`) in the [codebook](do
 
 Releases are named after the year and month of the Care Compare Provider Information processing date (`v2026.08`) and stored in the research store under `releases/<release>/`, with the CMS files they were built from under `raw/<release>/` and a root `manifest.json` that lists every release. Each release ships `manifest.json` (files, SHA-256 checksums, row counts, source vintages, validation report), `codebook.md`, `methodology.md`, `LICENSE-DATA.md` and `CHANGELOG.md`.
 
-Public download links are published at <https://thecareratings.com/data/> once the data pages launch.
+Download pages: <https://thecareratings.com/data/>. Files are served from the research store at `https://data.thecareratings.com/` (`manifest.json` at the root lists every release; `releases/<release>/manifest.json` lists every file with its SHA-256).
 
 ## Build it yourself
 
@@ -47,6 +47,8 @@ Validation reconciles the release with the national row of the CMS chain file (f
 ## Research store
 
 Releases are published to a dedicated Cloudflare R2 bucket through the S3 API. Configure `TCR_R2_ACCOUNT_ID`, `TCR_R2_ACCESS_KEY_ID`, `TCR_R2_SECRET_ACCESS_KEY` and optionally `TCR_R2_BUCKET` (default `careratings-open-data`). The GitHub Actions workflow `build-release.yml` runs the build monthly and publishes when those secrets are configured.
+
+The bucket is read through the custom domain `data.thecareratings.com` with a GET/HEAD-only CORS policy (`infra/r2-cors.json`, applied with `tcr-open-data cors --live`); release and raw objects are uploaded as immutable, manifests revalidate every five minutes (`tcr-open-data headers --live` rewrites those headers on objects already stored). Each release is archived at Zenodo for a DOI (`tcr-open-data doi`). Step by step: [docs/publishing.md](docs/publishing.md).
 
 ## History store
 
@@ -75,6 +77,8 @@ The ownership disclosure flags are the facility's own answers on Form CMS-855A. 
 
 ## Citing
 
-> The Care Ratings. Open Nursing Home Data, release v2026.08. Built from Centers for Medicare & Medicaid Services public files. https://thecareratings.com/data/
+> The Care Ratings (2026). Open Nursing Home Data, release v2026.08 (CMS August 2026 vintage). Built from Centers for Medicare & Medicaid Services public files. https://thecareratings.com/data/releases/v2026.08/
+
+Each release also carries a DOI once it is archived at Zenodo; the release page and its `manifest.json` list it. More formats: <https://thecareratings.com/data/cite/>.
 
 A machine-readable citation is in [CITATION.cff](CITATION.cff).

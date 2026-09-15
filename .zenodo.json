@@ -1,0 +1,24 @@
+{
+  "title": "The Care Ratings Open Nursing Home Data",
+  "description": "Monthly, versioned, facility-level releases of U.S. nursing home data built from Centers for Medicare & Medicaid Services public files: Care Compare provider information, penalties and ownership, PECOS enrollments, owners and changes of ownership, and chain performance measures. Every column is tagged with its provenance (cms or tcr); derived columns are documented in the codebook and methodology shipped with each release.",
+  "creators": [
+    { "name": "The Care Ratings", "affiliation": "The Care Ratings, https://thecareratings.com/" }
+  ],
+  "license": "cc-by-4.0",
+  "upload_type": "dataset",
+  "access_right": "open",
+  "keywords": [
+    "nursing homes",
+    "long-term care",
+    "CMS Care Compare",
+    "PECOS",
+    "ownership",
+    "private equity",
+    "REIT",
+    "staffing",
+    "civil money penalties",
+    "Special Focus Facility",
+    "United States"
+  ],
+  "notes": "CMS source values are U.S. government work in the public domain and need no attribution. The CC BY 4.0 license applies to the derived columns, the arrangement of the release and the documentation; the identifier crosswalk table is CC0 1.0."
+}

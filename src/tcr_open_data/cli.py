@@ -11,6 +11,9 @@ Command line: download, build, validate, publish, or run the whole release.
     tcr-open-data reharmonize --out history
     tcr-open-data sff-history --out history
     tcr-open-data publish-history --history history [--live]
+    tcr-open-data headers [--prefix releases/] [--live]      # rewrite Content-Type / Cache-Control on stored objects
+    tcr-open-data cors [--live]                             # apply infra/r2-cors.json (GET/HEAD only)
+    tcr-open-data doi --release releases/v2026.08 [--sandbox] [--publish] [--concept-record-id N]
 """
 
 from __future__ import annotations
@@ -27,8 +30,9 @@ from .download import download_all, load_sources_json
 from .history import backfill, consolidate, list_snapshots, reharmonize
 from .manifest import write_release_manifest
 from .sff import Capture, build_sff_history, fetch_capture, list_captures
-from .storage import R2Config, publish, publish_history
+from .storage import R2Config, publish, publish_history, put_cors, retag_objects
 from .validate import validate_release
+from .zenodo import deposit_release, token_from_env
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -163,6 +167,36 @@ def cmd_publish_history(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_headers(args: argparse.Namespace) -> int:
+    summary = retag_objects(R2Config.from_env(), prefix=args.prefix, dry_run=not args.live)
+    print(json.dumps(summary, indent=2))
+    return 0
+
+
+def cmd_cors(args: argparse.Namespace) -> int:
+    rules = json.loads(Path(args.rules).read_text(encoding="utf-8"))
+    try:
+        summary = put_cors(R2Config.from_env(), rules, dry_run=not args.live)
+    except Exception as exc:  # noqa: BLE001 - bucket-scoped object tokens cannot change bucket configuration
+        if "AccessDenied" not in str(exc):
+            raise
+        print(f"The API token cannot set bucket configuration ({exc}).", file=sys.stderr)
+        print(f"Apply the policy in the Cloudflare dashboard instead: R2 > bucket > Settings > CORS Policy, paste {args.rules}.", file=sys.stderr)
+        return 2
+    print(json.dumps(summary, indent=2))
+    return 0
+
+
+def cmd_doi(args: argparse.Namespace) -> int:
+    token = token_from_env(args.sandbox)
+    result = deposit_release(Path(args.release), token, sandbox=args.sandbox, publish=args.publish, concept_record_id=args.concept_record_id)
+    print(json.dumps(result, indent=2))
+    if not args.publish:
+        print("Draft only: check it at the html link above, then re-run with --publish (or press Publish on Zenodo).", file=sys.stderr)
+    print("Re-publish the release to the research store so manifest.json carries the DOI: tcr-open-data publish --release <dir> --raw <raw> --live", file=sys.stderr)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="tcr-open-data", description="Build The Care Ratings open nursing-home data releases from CMS files.")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -234,6 +268,23 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--history", default="history")
     p.add_argument("--live", action="store_true")
     p.set_defaults(func=cmd_publish_history)
+
+    p = sub.add_parser("headers", help="Rewrite Content-Type and Cache-Control on objects already in the research store (dry run unless --live)")
+    p.add_argument("--prefix", default="", help="Only objects under this key prefix, e.g. releases/ or history/")
+    p.add_argument("--live", action="store_true")
+    p.set_defaults(func=cmd_headers)
+
+    p = sub.add_parser("cors", help="Apply the read-only CORS policy to the research store bucket (dry run unless --live)")
+    p.add_argument("--rules", default=str(REPO_ROOT / "infra" / "r2-cors.json"))
+    p.add_argument("--live", action="store_true")
+    p.set_defaults(func=cmd_cors)
+
+    p = sub.add_parser("doi", help="Archive a release at Zenodo and mint its DOI (draft unless --publish)")
+    p.add_argument("--release", required=True, help="Release directory, e.g. releases/v2026.08")
+    p.add_argument("--sandbox", action="store_true", help="Use sandbox.zenodo.org (ZENODO_SANDBOX_TOKEN)")
+    p.add_argument("--publish", action="store_true", help="Publish the deposition (irreversible)")
+    p.add_argument("--concept-record-id", type=int, default=None, help="Record id of the existing Zenodo record to version (later releases)")
+    p.set_defaults(func=cmd_doi)
 
     args = parser.parse_args(argv)
     return args.func(args)

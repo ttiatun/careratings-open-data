@@ -28,6 +28,28 @@ def content_type(path: Path) -> str:
     return CONTENT_TYPES.get(path.suffix.lower()) or mimetypes.guess_type(path.name)[0] or "application/octet-stream"
 
 
+CACHE_IMMUTABLE = "public, max-age=31536000, immutable"
+CACHE_REVALIDATE = "public, max-age=3600, must-revalidate"
+CACHE_MANIFEST = "public, max-age=300, must-revalidate"
+
+
+def cache_control(key: str) -> str:
+    """Release and raw objects never change once published; per-snapshot history files never change either.
+    Manifests and the stacked history tables are rebuilt, so they must revalidate."""
+    name = key.rsplit("/", 1)[-1]
+    if name in ("manifest.json", "sff_manifest.json", "sources.json"):
+        return CACHE_MANIFEST
+    if key.startswith(("releases/", "raw/")):
+        return CACHE_IMMUTABLE
+    if key.startswith(("history/raw/", "history/harmonized/", "history/sff/raw/")):
+        return CACHE_IMMUTABLE
+    return CACHE_REVALIDATE
+
+
+def upload_args(key: str, path: Path) -> dict:
+    return {"ContentType": content_type(path), "CacheControl": cache_control(key)}
+
+
 @dataclass
 class R2Config:
     account_id: str
@@ -84,7 +106,7 @@ def publish_history(history_dir: Path, dry_run: bool = True, config: R2Config | 
         raise RuntimeError("R2 configuration is missing (TCR_R2_ACCOUNT_ID, TCR_R2_ACCESS_KEY_ID, TCR_R2_SECRET_ACCESS_KEY)")
     s3 = client or _client(config)
     for path, key in uploads:
-        s3.upload_file(str(path), config.bucket, key, ExtraArgs={"ContentType": content_type(path)})
+        s3.upload_file(str(path), config.bucket, key, ExtraArgs=upload_args(key, path))
     return summary
 
 
@@ -107,7 +129,7 @@ def publish(release_dir: Path, raw_dir: Path | None, dry_run: bool = True, confi
         raise RuntimeError("R2 configuration is missing (TCR_R2_ACCOUNT_ID, TCR_R2_ACCESS_KEY_ID, TCR_R2_SECRET_ACCESS_KEY)")
     s3 = client or _client(config)
     for path, key in uploads:
-        s3.upload_file(str(path), config.bucket, key, ExtraArgs={"ContentType": content_type(path)})
+        s3.upload_file(str(path), config.bucket, key, ExtraArgs=upload_args(key, path))
     existing = None
     try:
         body = s3.get_object(Bucket=config.bucket, Key="manifest.json")["Body"].read()
@@ -115,6 +137,45 @@ def publish(release_dir: Path, raw_dir: Path | None, dry_run: bool = True, confi
     except Exception:  # noqa: BLE001 - first release, or the root manifest is unreadable; start fresh
         existing = None
     root = update_root_manifest(existing, manifest)
-    s3.put_object(Bucket=config.bucket, Key="manifest.json", Body=json.dumps(root, indent=2).encode("utf-8"), ContentType=CONTENT_TYPES[".json"])
+    s3.put_object(Bucket=config.bucket, Key="manifest.json", Body=json.dumps(root, indent=2).encode("utf-8"), ContentType=CONTENT_TYPES[".json"],
+                  CacheControl=CACHE_MANIFEST)
     summary["root_manifest"] = root
     return summary
+
+
+def list_keys(config: R2Config, prefix: str = "", client=None) -> list[str]:
+    s3 = client or _client(config)
+    keys: list[str] = []
+    for page in s3.get_paginator("list_objects_v2").paginate(Bucket=config.bucket, Prefix=prefix):
+        keys.extend(o["Key"] for o in page.get("Contents", []))
+    return keys
+
+
+def retag_objects(config: R2Config, prefix: str = "", dry_run: bool = True, client=None) -> dict:
+    """Rewrite Content-Type and Cache-Control on every object under a prefix (copy onto itself with replaced metadata)."""
+    s3 = client or _client(config)
+    keys = list_keys(config, prefix, client=s3)
+    plan = [(key, content_type(Path(key)), cache_control(key)) for key in keys]
+    if not dry_run:
+        for key, ctype, cache in plan:
+            s3.copy_object(Bucket=config.bucket, Key=key, CopySource={"Bucket": config.bucket, "Key": key},
+                           MetadataDirective="REPLACE", ContentType=ctype, CacheControl=cache)
+    by_cache: dict[str, int] = {}
+    for _key, _ctype, cache in plan:
+        by_cache[cache] = by_cache.get(cache, 0) + 1
+    return {"bucket": config.bucket, "prefix": prefix, "objects": len(plan), "by_cache_control": by_cache, "dry_run": dry_run}
+
+
+def put_cors(config: R2Config, rules: list[dict], dry_run: bool = True, client=None) -> dict:
+    """Apply a CORS policy (S3 PutBucketCors). Read-only rules: GET and HEAD from any origin."""
+    s3 = client or _client(config)
+    for rule in rules:
+        bad = [m for m in rule.get("AllowedMethods", []) if m not in ("GET", "HEAD")]
+        if bad:
+            raise ValueError(f"CORS rule allows {bad}; the research store is read-only for browsers")
+    if not dry_run:
+        s3.put_bucket_cors(Bucket=config.bucket, CORSConfiguration={"CORSRules": rules})
+    current = None
+    if not dry_run:
+        current = s3.get_bucket_cors(Bucket=config.bucket).get("CORSRules")
+    return {"bucket": config.bucket, "rules": rules, "applied": not dry_run, "current": current}

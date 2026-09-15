@@ -173,7 +173,7 @@ def test_publish_live_uploads_and_updates_root_manifest(release):
                 raise KeyError(Key)
             return {"Body": type("B", (), {"read": lambda self_, k=Key: self.objects[k]})()}
 
-        def put_object(self, Bucket, Key, Body, ContentType):
+        def put_object(self, Bucket, Key, Body, ContentType, CacheControl=None):
             self.objects[Key] = Body
 
     fake = FakeS3()
