@@ -91,5 +91,61 @@ The report is stored as `validation.json` in the release and copied into `manife
 ## 8. Known limitations
 
 - Care Compare's penalties cover CMS's three-year lookback, and the public file does not distinguish per-instance from per-day civil money penalties.
-- Special Focus Facility history is not yet included; the current SFF and candidate flags come from Provider Information.
+- The Special Focus Facility history before 2019 comes from PDFs without CCNs; matches to facilities are by name and ZIP (section 10).
 - Ownership disclosure is self-reported. Missing owners or flags reflect what was reported to CMS, not what was verified.
+
+## 9. History store: monthly archive backfill
+
+The Provider Data Catalog keeps a monthly snapshot of the whole nursing-home theme since January 2019 (`/api/1/archive/aggregate/theme/nursing-homes/relative`; 89 monthly zips through August 2026; the annual bundles only re-pack them). `tcr-open-data backfill` (`history.py`) pulls three files out of every snapshot with HTTP range requests, so a run downloads about a tenth of the archive:
+
+| File | Stored as |
+| --- | --- |
+| Provider Information | `history/raw/provider_info/<snapshot>.parquet` (every CMS column as text) and `history/harmonized/provider_info/<snapshot>.parquet` (typed, canonical names) |
+| Penalties | `history/raw/penalties/…`, `history/harmonized/penalties/…` |
+| Ownership (Care Compare) | `history/raw/ownership/…`, `history/harmonized/ownership/…` |
+
+The raw file is lossless, so the harmonized layer can be rebuilt without downloading anything (`tcr-open-data reharmonize`) whenever the synonym map gains a column.
+
+### Column eras and the synonym map
+
+CMS renamed the columns twice. The harmonizer maps each canonical column to whichever name the snapshot uses (`FACILITY_COLUMNS`, `PENALTY_COLUMNS`, `OWNERSHIP_COLUMNS` in `history.py`; matching is case-insensitive):
+
+| Era | Snapshots | Example names |
+| --- | --- | --- |
+| 1 | 2019-01 to 2020-09 | `PROVNUM`, `PROVNAME`, `OVERALL_RATING`, `FINE_TOT`, `FILEDATE` |
+| 2 | 2020-10 to 2023-09 | `Federal Provider Number`, `Provider City`, `Provider State` |
+| 3 | 2023-10 onward | `CMS Certification Number (CCN)`, `City/Town`, `State` |
+
+Columns that a snapshot does not carry are NULL in the harmonized file and listed per snapshot in `history/coverage.csv` (`unmapped_canonical`). Columns the map does not know are kept in the raw file and listed as `unused_source`. Notable gaps and renames:
+
+- The abuse icon starts in late 2019; weekend staffing and turnover in 2022; `urban` in 2026.
+- Chain identifiers were published as *Affiliated Entity ID/Name* from 2024 and renamed *Chain ID/Name* in 2026; both map to `chain_id` and `chain_name`.
+- `special_focus_status` is `Y`/`N` in era 1 and `SFF`/`SFF Candidate` later.
+- The Penalties *Fine ID* appears only in the newest snapshots; earlier penalties are keyed by CCN, date, type and amount.
+
+Besides the release columns, the harmonized facility file carries the case-mix staffing hours, the nursing case-mix index, the phone number, the resident/family council and sprinkler flags, and the rating-cycle-1 survey date, deficiency count and total health score, because the enforcement and staffing analyses need them.
+
+### Snapshot vintages
+
+A snapshot is the archive date; `processing_date` inside the file is the CMS vintage. Some snapshots re-publish the previous month (2020-11/12, 2021-10/11, 2022-10/11, 2023-10/11, 2024-10/11 and 2026-07-29/2026-08-06 share a vintage), and the 2026-08-06 zip carries only Provider Information. `coverage.csv` lists the vintage of every snapshot and table so duplicates can be dropped before counting.
+
+### Stacked tables
+
+- `facilities_history.parquet`: one row per facility per snapshot (`snapshot_date`, `header_era`, then the canonical columns).
+- `penalties_history.parquet`: one row per distinct penalty (`ccn`, `penalty_date`, `penalty_type`, `fine_amount`, denial start and length) with `first_seen_snapshot`, `last_seen_snapshot`, `snapshots_seen` and the `fine_id` where CMS published one. Because each monthly file covers a three-year lookback, the union reaches back to penalties imposed in 2016, and a penalty CMS later removed still appears with its last seen date.
+- `ownership_history.parquet`: one row per distinct Care Compare owner relationship (`ccn`, `role`, `owner_type`, `owner_name`) with first and last seen snapshots and the latest percentage and association text.
+- `coverage.csv` / `coverage.parquet`: snapshot × table presence, row counts, header era, vintage, and unmapped columns.
+- `history/manifest.json`: build metadata, file checksums, and any missing files or failed snapshots.
+
+Encoding normalization and type casting follow sections 3 and 4. Numeric CCNs shorter than six characters are left-padded.
+
+## 10. Special Focus Facility history
+
+CMS publishes the SFF list as a PDF that it overwrites in place, at `cms.gov/Medicare/Provider-Enrollment-and-Certification/CertificationandComplianc/Downloads/SFFList.pdf`. The Internet Archive has captured it since April 2012. `tcr-open-data sff-history` (`sff.py`) lists one capture per month through the CDX API (queried one year at a time, because a single unbounded query dropped six years of captures), fetches the original bytes of each capture with retries and a pause between downloads, records its SHA-256 (identical consecutive captures are marked `duplicate_of_previous`), and parses the text page by page.
+
+- Each edition carries an "Updated <Month D, YYYY>" line, stored as `edition_date`; the capture date is stored separately.
+- Every data page prints its table label once, above or below the rows ("Table A: Facilities Newly Added to the SFF Program", "Table F: SFF Candidate List"). A row takes the nearest label above it, else the first label below it, else the label carried over from the previous page. Table letters changed meaning over the years, so `table_title` is stored with every row.
+- 2012 to 2022 editions print no CCN: `Name Street City ST ZIP phone [inspection date] months`. Editions from 2023 print a six-character CCN and a *Met / Not Met* survey column. `layout` records which pattern matched (`rows`, `rows_no_ccn`), and `legacy` marks an edition whose text matched neither.
+- Facility name and street address are split at the first street number or "P O Box"; that split is best effort.
+- Rows without a printed CCN are matched to `facilities_history` (2019 onward) by normalized name, state and ZIP, then by state and ZIP when only one facility ever had that ZIP; `ccn_match` records `printed`, `name_state_zip`, `state_zip_unique` or `unmatched`. Facilities that closed before 2019 stay unmatched.
+- CMS stopped updating this PDF after the April 24, 2024 edition; later captures carry the same content. Monthly SFF and candidate status from January 2019 onward is available regardless in `facilities_history.special_focus_status`.

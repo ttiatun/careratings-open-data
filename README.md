@@ -48,6 +48,27 @@ Validation reconciles the release with the national row of the CMS chain file (f
 
 Releases are published to a dedicated Cloudflare R2 bucket through the S3 API. Configure `TCR_R2_ACCOUNT_ID`, `TCR_R2_ACCESS_KEY_ID`, `TCR_R2_SECRET_ACCESS_KEY` and optionally `TCR_R2_BUCKET` (default `careratings-open-data`). The GitHub Actions workflow `build-release.yml` runs the build monthly and publishes when those secrets are configured.
 
+## History store
+
+Releases are latest-only. The history lives beside them under `history/` in the research store and is rebuilt from public archives, never from the production database:
+
+```bash
+tcr-open-data backfill --out history                 # 89 monthly CMS archive snapshots (2019-01 onward), resumable
+tcr-open-data reharmonize --out history              # rebuild the typed layer from the raw Parquet after a synonym change
+tcr-open-data sff-history --out history              # Special Focus Facility PDFs from the Internet Archive (2012-2024)
+tcr-open-data publish-history --history history --live
+```
+
+| File | Content |
+| --- | --- |
+| `facilities_history.parquet` | One row per facility per monthly snapshot: ratings, staffing, penalties, SFF status, chain, case-mix hours, cycle-1 survey score |
+| `penalties_history.parquet` | Every distinct fine and payment denial seen in any snapshot (2016 onward) with first and last seen dates |
+| `ownership_history.parquet` | Every Care Compare owner relationship with first and last seen dates |
+| `sff_history.parquet`, `sff_editions.parquet` | Special Focus Facility tables by edition, with CCNs matched by name and ZIP where the PDF printed none |
+| `coverage.csv`, `manifest.json`, `sff_manifest.json` | Which snapshot carried which file and columns, CMS vintages, checksums, failures |
+
+The raw per-snapshot files (`history/raw/<table>/<date>.parquet`) keep every CMS column as text, so the harmonized layer is reproducible. Sections 9 and 10 of the [methodology](docs/methodology.md) describe the column eras and the PDF layouts.
+
 ## What this data is not
 
 The ownership disclosure flags are the facility's own answers on Form CMS-855A. A facility that does not disclose a private-equity or REIT owner has not reported one; that is not a finding that it has none. See the methodology's *Owner versus party* section before quoting any ownership figure.

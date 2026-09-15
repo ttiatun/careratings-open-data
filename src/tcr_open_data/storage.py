@@ -62,6 +62,32 @@ def plan_uploads(release_dir: Path, raw_dir: Path | None, release: str) -> list[
     return uploads
 
 
+def plan_history_uploads(history_dir: Path) -> list[tuple[Path, str]]:
+    """Every file under the history directory, keyed under history/ in the bucket (temporary CSVs excluded)."""
+    uploads: list[tuple[Path, str]] = []
+    for path in sorted(history_dir.rglob("*")):
+        if not path.is_file() or path.suffix == ".part" or path.name.endswith(".jsonl"):
+            continue
+        if path.suffix == ".csv" and path.parent != history_dir:
+            continue
+        uploads.append((path, "history/" + path.relative_to(history_dir).as_posix()))
+    return uploads
+
+
+def publish_history(history_dir: Path, dry_run: bool = True, config: R2Config | None = None, client=None) -> dict:
+    uploads = plan_history_uploads(history_dir)
+    summary = {"bucket": config.bucket if config else None, "objects": len(uploads), "bytes": sum(p.stat().st_size for p, _ in uploads), "dry_run": dry_run,
+               "sample": [k for _, k in uploads[:12]]}
+    if dry_run:
+        return summary
+    if config is None:
+        raise RuntimeError("R2 configuration is missing (TCR_R2_ACCOUNT_ID, TCR_R2_ACCESS_KEY_ID, TCR_R2_SECRET_ACCESS_KEY)")
+    s3 = client or _client(config)
+    for path, key in uploads:
+        s3.upload_file(str(path), config.bucket, key, ExtraArgs={"ContentType": content_type(path)})
+    return summary
+
+
 def _client(config: R2Config):
     import boto3
     from botocore.config import Config

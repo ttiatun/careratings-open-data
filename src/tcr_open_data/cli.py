@@ -7,6 +7,10 @@ Command line: download, build, validate, publish, or run the whole release.
     tcr-open-data publish --release releases/v2026.08 --raw raw/v2026.08 [--live]
     tcr-open-data release [--raw raw/v2026.08] [--publish] [--strict]
     tcr-open-data codebook --out docs/codebook.md
+    tcr-open-data backfill --out history [--since --until --retry-failed]
+    tcr-open-data reharmonize --out history
+    tcr-open-data sff-history --out history
+    tcr-open-data publish-history --history history [--live]
 """
 
 from __future__ import annotations
@@ -20,8 +24,10 @@ from pathlib import Path
 from .build import build_release
 from .codebook import render_codebook
 from .download import download_all, load_sources_json
+from .history import backfill, consolidate, list_snapshots, reharmonize
 from .manifest import write_release_manifest
-from .storage import R2Config, publish
+from .sff import build_sff_history, fetch_capture, list_captures
+from .storage import R2Config, publish, publish_history
 from .validate import validate_release
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -109,6 +115,48 @@ def cmd_codebook(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_backfill(args: argparse.Namespace) -> int:
+    snapshots = [s for s in list_snapshots() if (not args.since or s.date >= args.since) and (not args.until or s.date <= args.until)]
+    if args.limit:
+        snapshots = snapshots[: args.limit]
+    tables = args.tables.split(",") if args.tables else None
+    history = Path(args.out)
+    coverage = backfill(history, snapshots, tables=tables, resume=not args.no_resume, retry_failed=args.retry_failed)
+    manifest = consolidate(history)
+    errors = [r for r in coverage if r.get("error")]
+    print(json.dumps({"snapshots": manifest["snapshots"], "tables": manifest["tables"], "errors": len(errors)}, indent=2))
+    return 1 if errors and args.strict else 0
+
+
+def cmd_reharmonize(args: argparse.Namespace) -> int:
+    history = Path(args.out)
+    tables = args.tables.split(",") if args.tables else None
+    coverage = reharmonize(history, tables=tables)
+    manifest = consolidate(history)
+    print(json.dumps({"snapshots": manifest["snapshots"], "tables": manifest["tables"], "coverage_rows": len(coverage)}, indent=2))
+    return 0
+
+
+def cmd_sff_history(args: argparse.Namespace) -> int:
+    captures = list_captures()
+    if args.limit:
+        captures = captures[-args.limit:]
+    history = Path(args.out)
+
+    def fetch(capture, cache_dir, session):
+        return fetch_capture(capture, cache_dir, session, retries=args.retries, pause=args.pause)
+
+    summary = build_sff_history(captures, history, fetch=fetch, facilities_parquet=history / "facilities_history.parquet")
+    print(json.dumps(summary, indent=2))
+    return 0
+
+
+def cmd_publish_history(args: argparse.Namespace) -> int:
+    summary = publish_history(Path(args.history), dry_run=not args.live, config=R2Config.from_env())
+    print(json.dumps(summary, indent=2))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="tcr-open-data", description="Build The Care Ratings open nursing-home data releases from CMS files.")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -151,6 +199,34 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("codebook", help="Render docs/codebook.md from the schema")
     p.add_argument("--out", default=str(REPO_ROOT / "docs" / "codebook.md"))
     p.set_defaults(func=cmd_codebook)
+
+    p = sub.add_parser("backfill", help="Pull monthly CMS archive snapshots into the history store (resumable)")
+    p.add_argument("--out", default="history")
+    p.add_argument("--since", default=None, help="Earliest snapshot date, YYYY-MM-DD")
+    p.add_argument("--until", default=None, help="Latest snapshot date, YYYY-MM-DD")
+    p.add_argument("--limit", type=int, default=None)
+    p.add_argument("--tables", default=None, help="Comma-separated subset of provider_info,penalties,ownership")
+    p.add_argument("--no-resume", action="store_true", help="Reprocess snapshots already recorded in coverage.jsonl")
+    p.add_argument("--retry-failed", action="store_true", help="Reprocess snapshots recorded with an error or a missing file")
+    p.add_argument("--strict", action="store_true", help="Exit non-zero when any snapshot failed")
+    p.set_defaults(func=cmd_backfill)
+
+    p = sub.add_parser("reharmonize", help="Rebuild the harmonized files and history tables from the raw Parquet already on disk")
+    p.add_argument("--out", default="history")
+    p.add_argument("--tables", default=None, help="Comma-separated subset of provider_info,penalties,ownership")
+    p.set_defaults(func=cmd_reharmonize)
+
+    p = sub.add_parser("sff-history", help="Rebuild Special Focus Facility history from archived CMS PDFs")
+    p.add_argument("--out", default="history")
+    p.add_argument("--limit", type=int, default=None, help="Only the newest N captures")
+    p.add_argument("--retries", type=int, default=5, help="Attempts per capture before recording it as unavailable")
+    p.add_argument("--pause", type=float, default=2.0, help="Seconds to wait between downloads (the Internet Archive throttles bursts)")
+    p.set_defaults(func=cmd_sff_history)
+
+    p = sub.add_parser("publish-history", help="Upload the history store to R2 under history/ (dry run unless --live)")
+    p.add_argument("--history", default="history")
+    p.add_argument("--live", action="store_true")
+    p.set_defaults(func=cmd_publish_history)
 
     args = parser.parse_args(argv)
     return args.func(args)

@@ -13,3 +13,10 @@ First release built by `tcr-open-data` 0.1.0.
 ## Build 0.1.0
 
 - Initial build pipeline: exact header guards for every CMS file, DuckDB projections, schema-driven typing, validation against the national row of the CMS chain file, manifests with SHA-256 checksums, generated codebook, and R2 publishing.
+
+## History store (built September 15, 2026)
+
+- `tcr-open-data backfill`: monthly Provider Information, Penalties and Ownership snapshots from the CMS archive (January 2019 onward) as raw and harmonized Parquet, stacked into `facilities_history`, `penalties_history`, `ownership_history`, with a coverage table (including each snapshot's CMS vintage) and a manifest. Resumable; records failed snapshots instead of stopping; `--retry-failed` reprocesses them.
+- `tcr-open-data reharmonize`: rebuilds the harmonized layer and the stacked tables from the raw Parquet on disk after a synonym-map change.
+- `tcr-open-data sff-history`: Special Focus Facility editions from Internet Archive captures of the CMS PDF (April 2012 to April 2024), parsed page by page for the three printed layouts; rows without a printed CCN are matched to facilities by name, state and ZIP.
+- `tcr-open-data publish-history`: uploads the history store under `history/` in the research bucket.
