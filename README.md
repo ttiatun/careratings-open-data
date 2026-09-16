@@ -2,7 +2,7 @@
 
 Monthly, versioned, facility-level releases of U.S. nursing home data, built by this repository from public files of the Centers for Medicare & Medicaid Services (CMS). Anyone can rebuild a release from the same CMS files and get the same bytes.
 
-![How a release is built and published: CMS public files go through the tcr-open-data build into the research store, which is read by the website, Zenodo and anyone.](docs/images/pipeline.svg)
+![Open Nursing Home Data by The Care Ratings: ratings, staffing, ownership and penalties as CSV and Parquet, at thecareratings.com/data](docs/images/open-nursing-home-data-banner.webp)
 
 Each release contains eight tables as CSV and Parquet:
 
@@ -26,6 +26,8 @@ Releases are named after the year and month of the Care Compare Provider Informa
 Download pages: <https://thecareratings.com/data/>. Downloads there ask for an email address and a human check the first time, then hand out short-lived signed links from the private research store. The same files, with the same checksums, can be downloaded without either from the Zenodo archive of each release (v2026.08: <https://zenodo.org/records/22780105>). `manifest.json` in each release lists every file with its SHA-256.
 
 ## Build it yourself
+
+![How a release is built and published: CMS public files go through the tcr-open-data build into the research store, which is read by the website, Zenodo and anyone.](docs/images/pipeline.svg)
 
 ```bash
 python -m venv .venv && . .venv/bin/activate     # Windows: .venv\Scripts\activate
@@ -93,4 +95,4 @@ The ownership disclosure flags are the facility's own answers on Form CMS-855A. 
 
 Every release is archived at Zenodo under the concept DOI [10.5281/zenodo.22780104](https://doi.org/10.5281/zenodo.22780104); each release has its own version DOI (v2026.08: [10.5281/zenodo.22780105](https://doi.org/10.5281/zenodo.22780105)), listed on the release page and in its `manifest.json`. More formats: <https://thecareratings.com/data/cite/>.
 
-A machine-readable citation is in [CITATION.cff](CITATION.cff).
+A machine-readable citation is in [CITATION.cff](CITATION.cff). Releases and reports are prepared by the [Care Ratings Team](https://thecareratings.com/blog/authors/care-ratings-team/) and reviewed by the [TCR Editorial Team](https://thecareratings.com/blog/authors/tcr-editorial-team/); the [editorial standards](https://thecareratings.com/data/editorial-standards/) describe what the program will and will not claim.
