@@ -1,8 +1,8 @@
 """
 Regenerate the README figures from the history store.
 
-    python scripts/readme_charts.py                 # reads ./history if present, else the public store
-    python scripts/readme_charts.py --source https://data.thecareratings.com
+    python scripts/readme_charts.py                 # reads ./history (build it with `tcr-open-data backfill` and `sff-history`)
+    python scripts/readme_charts.py --source /path/to/history
 
 Writes docs/images/certified-nursing-homes.svg, docs/images/sff-status.svg and
 docs/images/history-coverage.svg as plain SVG (no plotting library), so the
