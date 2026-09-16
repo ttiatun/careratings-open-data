@@ -32,7 +32,7 @@ DISCREPANCY_ISSUES: list[dict[str, str]] = [
     },
     {
         "issue": "PECOS enrollment lists no ownership-interest party",
-        "description": "The facility's current PECOS enrollment names officers, directors, managing employees or other parties, but no direct, indirect or partnership ownership interest (role codes 34, 35, 38, 39, 85, 86).",
+        "description": "The facility's current PECOS enrollment names officers, directors, managing employees or other parties, but no direct, indirect or partnership ownership interest (role codes 34, 35, 38, 39, 85, 86). Non-profit and government facilities have no equity owners to list, so most of these rows are expected; the check matters for for-profit facilities.",
     },
     {
         "issue": "Ownership-interest owners disclosed without any ownership percentage",
