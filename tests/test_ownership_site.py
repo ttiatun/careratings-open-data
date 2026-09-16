@@ -24,6 +24,8 @@ def test_ownership_site_files(release, tmp_path: Path):
         assert 0 <= s["for_profit_pct"] <= 100 and 0 <= s["pe_owner_pct"] <= 100
     assert {r["flag"] for r in ownership["owner_vs_party"]} == {"Private equity", "REIT"}
     assert [c["issue"] for c in ownership["discrepancy_counts"]] == [i["issue"] for i in DISCREPANCY_ISSUES]
+    assert sum(c["facilities"] for c in ownership["discrepancy_by_category"]) == sum(c["facilities"] for c in ownership["discrepancy_counts"])
+    assert isinstance(ownership["chains_with_disclosures"], list) and isinstance(ownership["carecompare_owner_turnover"], list)
 
     register = json.loads((out / "site" / "discrepancy_register.json").read_text(encoding="utf-8"))
     counted = {i["issue"]: i["facilities"] for i in register["issues"]}
