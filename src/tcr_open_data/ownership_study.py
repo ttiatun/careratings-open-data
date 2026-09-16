@@ -28,6 +28,7 @@ Outputs (CSV unless noted):
   discrepancy_register    seed rows for the discrepancy register, by type
   summary.md              the headline numbers in prose, with the caveats
   site/chains/            one JSON per CMS-identified chain plus an index, for the /data/chains/ pages (chain_profiles.py)
+  site/ownership.json, site/discrepancy_register.json   the headline tables, state map layers and the register for /data/ownership/ (ownership_site.py)
 """
 
 from __future__ import annotations
@@ -41,6 +42,7 @@ import duckdb
 
 from . import __version__
 from .chain_profiles import write_chain_profiles
+from .ownership_site import write_ownership_site
 
 # Care Compare renamed its ownership roles three times (vintages 2024-12, 2025-06 and
 # 2026-05) and, with the 2026 disclosure rule, added categories that did not exist
@@ -345,25 +347,43 @@ def run_study(release_dir: Path, out_dir: Path, history_dir: Path | None = None,
             results["carecompare_owner_turnover"] = {"error": str(exc)[:200]}
 
     discrepancies = emit("discrepancy_register", """
-        SELECT 'No PECOS enrollment matched to the CCN' AS issue, ccn, provider_name, state, NULL AS detail
-        FROM facilities WHERE pecos_enrollment_id IS NULL
+        WITH interest AS (
+            SELECT o.ccn, o.enrollment_id, o.percentage_ownership FROM owners_pecos o WHERE o.role_code IN ('34', '35', '38', '39', '85', '86'))
+        SELECT 'No PECOS enrollment matched to the CCN' AS issue, f.ccn, f.provider_name, f.state, f.ownership_category, f.chain_name, NULL AS detail
+        FROM facilities f WHERE f.pecos_enrollment_id IS NULL
         UNION ALL
-        SELECT 'PE or REIT owner disclosed in PECOS, Care Compare lists individuals only', f.ccn, f.provider_name, f.state,
+        SELECT 'PECOS enrollment lists no ownership-interest party', f.ccn, f.provider_name, f.state, f.ownership_category, f.chain_name,
+               (SELECT 'Roles listed: ' || string_agg(DISTINCT o.role_text, '; ' ORDER BY o.role_text) FROM owners_pecos o WHERE o.ccn = f.ccn AND o.enrollment_id = f.pecos_enrollment_id)
+        FROM facilities f
+        WHERE f.pecos_enrollment_id IS NOT NULL
+          AND NOT EXISTS (SELECT 1 FROM interest i WHERE i.ccn = f.ccn AND i.enrollment_id = f.pecos_enrollment_id)
+        UNION ALL
+        SELECT 'Ownership-interest owners disclosed without any ownership percentage', f.ccn, f.provider_name, f.state, f.ownership_category, f.chain_name,
+               (SELECT COUNT(*)::VARCHAR || ' ownership-interest rows, none with a percentage' FROM interest i WHERE i.ccn = f.ccn AND i.enrollment_id = f.pecos_enrollment_id)
+        FROM facilities f
+        WHERE f.pecos_enrollment_id IS NOT NULL
+          AND EXISTS (SELECT 1 FROM interest i WHERE i.ccn = f.ccn AND i.enrollment_id = f.pecos_enrollment_id)
+          AND NOT EXISTS (SELECT 1 FROM interest i WHERE i.ccn = f.ccn AND i.enrollment_id = f.pecos_enrollment_id AND i.percentage_ownership IS NOT NULL)
+        UNION ALL
+        SELECT 'PE or REIT owner disclosed in PECOS, Care Compare lists individuals only', f.ccn, f.provider_name, f.state, f.ownership_category, f.chain_name,
                concat_ws(' | ', f.private_equity_owner_names, f.reit_owner_names)
         FROM facilities f
         WHERE (f.has_private_equity_owner OR f.has_reit_owner)
           AND NOT EXISTS (SELECT 1 FROM owners_carecompare o WHERE o.ccn = f.ccn AND o.owner_type = 'Organization')
         UNION ALL
-        SELECT 'Chain id in Provider Information missing from the chain file', f.ccn, f.provider_name, f.state, f.chain_id
+        SELECT 'Chain id in Provider Information missing from the chain file', f.ccn, f.provider_name, f.state, f.ownership_category, f.chain_name, f.chain_id
         FROM facilities f LEFT JOIN chains c ON c.chain_id = f.chain_id
         WHERE f.chain_id IS NOT NULL AND c.chain_id IS NULL
         UNION ALL
-        SELECT 'Ownership changed in the last 12 months per Care Compare, no PECOS change of ownership in 36 months', f.ccn, f.provider_name, f.state, f.last_chow_date::VARCHAR
+        SELECT 'Ownership changed in the last 12 months per Care Compare, no PECOS change of ownership in 36 months', f.ccn, f.provider_name, f.state, f.ownership_category, f.chain_name,
+               'Last PECOS change of ownership: ' || COALESCE(f.last_chow_date::VARCHAR, 'none on file')
         FROM facilities f WHERE f.ownership_changed_12mo AND COALESCE(f.chow_count_36mo, 0) = 0
-        ORDER BY 1, 4, 2""")
+        ORDER BY 1, 4, 3, 2""")
 
     site = write_chain_profiles(con, out_dir / "site", manifest)
     results["site/chains"] = {"rows": site["chains"], "columns": ["index.json", "<chain_id>.json"]}
+    own = write_ownership_site(con, out_dir / "site", out_dir, manifest, discrepancies)
+    results["site/ownership"] = {"rows": own["states"], "columns": ["ownership.json", "discrepancy_register.json"]}
     summary = _summary(release, manifest, national[0] if national else None, con, discrepancies, ctx["has_history"], decomposition_rows)
     (out_dir / "summary.md").write_text(summary, encoding="utf-8")
     meta = {"release": release, "built_at": datetime.now(timezone.utc).isoformat(), "builder": {"name": "tcr-open-data", "version": __version__},
