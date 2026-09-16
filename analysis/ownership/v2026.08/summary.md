@@ -28,8 +28,8 @@ CMS leaves the organization name blank on some rows; those are grouped as *Name 
 - Name not published in the CMS file: 28 facilities
 - EMSIR LLC: 7 facilities
 - LADS AVENUE ASSOCIATES LLC: 6 facilities
-- 2020 GSR DYNASTY LLC: 5 facilities
 - AH DYNASTY LLC: 5 facilities
+- 2020 GSR DYNASTY LLC: 5 facilities
 
 ## Most-disclosed REITs (any role, mostly landlords)
 
@@ -47,8 +47,8 @@ CMS leaves the organization name blank on some rows; those are grouped as *Name 
 - OH: 4 (0.4% of the state's facilities)
 - OR: 4 (3.1% of the state's facilities)
 - CA: 4 (0.3% of the state's facilities)
-- IA: 3 (0.8% of the state's facilities)
 - NV: 3 (4.5% of the state's facilities)
+- IA: 3 (0.8% of the state's facilities)
 
 ## Changes of ownership by effective year (PECOS)
 
