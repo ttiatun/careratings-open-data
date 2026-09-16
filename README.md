@@ -85,6 +85,16 @@ tcr-open-data publish-history --history history --live
 
 The raw per-snapshot files (`history/raw/<table>/<date>.parquet`) keep every CMS column as text, so the harmonized layer is reproducible. Sections 9 and 10 of the [methodology](docs/methodology.md) describe the column eras and the PDF layouts.
 
+## Analysis tables
+
+The tables behind each research report are built from a release with one command and committed under `analysis/`, so any figure in a report can be checked against them:
+
+```bash
+tcr-open-data ownership-study --release releases/v2026.08 --history history --out analysis/ownership/v2026.08
+```
+
+`analysis/ownership/v2026.08/summary.md` carries the headline numbers and the caveats; section 11 of the methodology describes every table. The ownership figures are *as disclosed to CMS* (see below), and the Care Compare turnover series breaks in 2025 when CMS changed its role labels and the fuller disclosures under the 2023 ownership rule arrived (methodology, *Care Compare role labels*).
+
 ## What this data is not
 
 The ownership disclosure flags are the facility's own answers on Form CMS-855A. A facility that does not disclose a private-equity or REIT owner has not reported one; that is not a finding that it has none. See the methodology's *Owner versus party* section before quoting any ownership figure.
