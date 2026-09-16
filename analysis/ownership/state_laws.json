@@ -1,7 +1,7 @@
 {
   "updated": "2026-09-16",
   "scope": "Bills enacted or advanced since January 2025 on health care ownership disclosure, transaction notice or review, and private-equity or REIT involvement, with a note on whether each reaches nursing homes. Seeded from the Private Equity Stakeholder Project's 2025 State Healthcare Policy Review and Stateline's June 2026 report, then checked against each legislature's own record.",
-  "method": "An entry is added when a bill has passed at least one chamber or been signed. Status, dates and chapter numbers are read from the legislature's bill page or the enrolled act; where that page could not be reached from our network the note says which official source stood in. nursing_home_scope is 'Yes' when the act names nursing homes or nursing facilities, 'Partly' when it covers health care entities or facilities under definitions that can include them, and 'No' when it is limited to hospitals, physician practices or other providers. We do not characterize a law's effect; the summary restates what the bill page or act says.",
+  "method": "An entry is added when a bill has passed at least one chamber or been signed. Status, dates and chapter numbers are read from the legislature's bill page or the enrolled act; where that page could not be reached from our network, the entry's note says which official source stood in. We do not characterize a law's effect: each summary restates what the bill page or the act says.",
   "entries": [
     {
       "state": "CT",
@@ -12,12 +12,26 @@
       "status_date": "2026-06-04",
       "effective_date": "2026-10-01",
       "nursing_home_scope": "Yes",
-      "provisions": ["ownership disclosure", "PE/REIT governance limits", "financial security", "attestation"],
+      "provisions": [
+        "ownership disclosure",
+        "PE/REIT governance limits",
+        "financial security",
+        "attestation"
+      ],
       "summary": "Public Act 26-103. State-contracted nursing homes serving Medicaid recipients must report annually to the Department of Social Services any investment entity (including a REIT) with at least a 5% beneficial ownership interest; from February 1, 2028 the licensee must hold full control over governance, assets and activities and attest annually to the Department of Public Health that no investment entity controls resident health, safety or care (civil penalty up to $2,000 per violation; one-year waivers possible); homes with a 5% investment-entity owner must carry a surety bond or similar security covering 90 days of operating costs if DSS identifies a feasible instrument by January 1, 2028. Effective October 1, 2026; the DSS study and reporting requirement on passage.",
-      "primary_source": { "label": "Connecticut General Assembly, bill status SB 125 (2026) and Public Act 26-103", "url": "https://www.cga.ct.gov/asp/cgabillstatus/cgabillstatus.asp?selBillType=Bill&bill_num=SB00125&which_year=2026" },
+      "primary_source": {
+        "label": "Connecticut General Assembly, bill status SB 125 (2026) and Public Act 26-103",
+        "url": "https://www.cga.ct.gov/asp/cgabillstatus/cgabillstatus.asp?selBillType=Bill&bill_num=SB00125&which_year=2026"
+      },
       "secondary_sources": [
-        { "label": "OLR public act summary, PA 26-103", "url": "https://www.cga.ct.gov/2026/SUM/PDF/2026SUM00103-R02SB-00125-SUM.PDF" },
-        { "label": "Stateline / CT Mirror, June 9, 2026", "url": "https://ctmirror.org/2026/06/09/nursing-homes-private-equity/" }
+        {
+          "label": "OLR public act summary, PA 26-103",
+          "url": "https://www.cga.ct.gov/2026/SUM/PDF/2026SUM00103-R02SB-00125-SUM.PDF"
+        },
+        {
+          "label": "Stateline / CT Mirror, June 9, 2026",
+          "url": "https://ctmirror.org/2026/06/09/nursing-homes-private-equity/"
+        }
       ],
       "verified_on": "2026-09-16"
     },
@@ -30,9 +44,16 @@
       "status_date": "2026-05-27",
       "effective_date": "2026-05-27",
       "nursing_home_scope": "No",
-      "provisions": ["sale-leaseback limits", "attestation", "PE control limits"],
+      "provisions": [
+        "sale-leaseback limits",
+        "attestation",
+        "PE control limits"
+      ],
       "summary": "Public Act 26-22. Permits hospitals in financial distress to enter sale-leaseback agreements under set conditions and requires hospitals to attest that no private equity entity holds a controlling interest or interferes with clinical judgment. Hospitals only; listed here because it passed alongside SB 125.",
-      "primary_source": { "label": "Connecticut General Assembly, bill status SB 196 (2026) and Public Act 26-22", "url": "https://www.cga.ct.gov/asp/cgabillstatus/cgabillstatus.asp?selBillType=Bill&bill_num=SB00196&which_year=2026" },
+      "primary_source": {
+        "label": "Connecticut General Assembly, bill status SB 196 (2026) and Public Act 26-22",
+        "url": "https://www.cga.ct.gov/asp/cgabillstatus/cgabillstatus.asp?selBillType=Bill&bill_num=SB00196&which_year=2026"
+      },
       "verified_on": "2026-09-16"
     },
     {
@@ -44,10 +65,21 @@
       "status_date": "2026-08-07",
       "effective_date": null,
       "nursing_home_scope": "Partly",
-      "provisions": ["transaction notice", "PE definition"],
+      "provisions": [
+        "transaction notice",
+        "PE definition"
+      ],
       "summary": "Public Act 104-0782. Makes permanent the Health Care Facilities Planning Act change-of-ownership provisions and the Antitrust Act requirement that health care entities notify the Attorney General 30 days before a merger or affiliation, and extends that notice to covered transactions whose parties own or control health care facilities or provider organizations without being one themselves, expressly including private equity companies (defined as companies that collect capital and take a direct or indirect ownership share of an Illinois health care entity, or an out-of-state entity with $10 million or more in annual revenue from Illinois patients). The Planning Act's health care facilities include long-term care facilities.",
-      "primary_source": { "label": "Illinois General Assembly, bill status HB 5000 (104th GA)", "url": "https://www.ilga.gov/legislation/BillStatus.asp?DocNum=5000&GAID=18&DocTypeID=HB&SessionID=114&GA=104" },
-      "secondary_sources": [{ "label": "Stateline / CT Mirror, June 9, 2026", "url": "https://ctmirror.org/2026/06/09/nursing-homes-private-equity/" }],
+      "primary_source": {
+        "label": "Illinois General Assembly, bill status HB 5000 (104th GA)",
+        "url": "https://www.ilga.gov/legislation/BillStatus.asp?DocNum=5000&GAID=18&DocTypeID=HB&SessionID=114&GA=104"
+      },
+      "secondary_sources": [
+        {
+          "label": "Stateline / CT Mirror, June 9, 2026",
+          "url": "https://ctmirror.org/2026/06/09/nursing-homes-private-equity/"
+        }
+      ],
       "verified_on": "2026-09-16",
       "notes": "Effective date not stated on the bill status page; see the public act text."
     },
@@ -60,9 +92,16 @@
       "status_date": "2026-07-30",
       "effective_date": null,
       "nursing_home_scope": "No",
-      "provisions": ["ownership disclosure", "transaction notice", "debt-funded dividend limits"],
+      "provisions": [
+        "ownership disclosure",
+        "transaction notice",
+        "debt-funded dividend limits"
+      ],
       "summary": "Public Act 104-0661. Licensed community living, MC/DD, ID/DD and CILA facilities and child care facilities must disclose at licensure and quarterly whether they, their affiliates or contractors are owned or managed by an asset management company, give written notice of transactions that dispose of or transfer control of material assets, and are barred from transactions that would have the facility issue debt-funded dividends or otherwise cause financial distress; agencies must publish the filings. Developmental-disability and child care facilities, not skilled nursing facilities.",
-      "primary_source": { "label": "Illinois General Assembly, bill status HB 4728 (104th GA)", "url": "https://www.ilga.gov/legislation/BillStatus.asp?DocNum=4728&GAID=18&DocTypeID=HB&SessionID=114&GA=104" },
+      "primary_source": {
+        "label": "Illinois General Assembly, bill status HB 4728 (104th GA)",
+        "url": "https://www.ilga.gov/legislation/BillStatus.asp?DocNum=4728&GAID=18&DocTypeID=HB&SessionID=114&GA=104"
+      },
       "verified_on": "2026-09-16",
       "notes": "The synopsis as introduced is summarized; the House floor amendment replaced the text, so consult the enrolled act for the final scope."
     },
@@ -75,10 +114,21 @@
       "status_date": "2026-02-05",
       "effective_date": null,
       "nursing_home_scope": "Yes",
-      "provisions": ["related-party rent disclosure", "Medicaid incentive payment reduction"],
+      "provisions": [
+        "related-party rent disclosure",
+        "Medicaid incentive payment reduction"
+      ],
       "summary": "Would require any Medicaid-enrolled nursing facility that pays rent or lease payments to publicly disclose them, including whether the payments go to a related party and the related party rent expense; the Department of Medical Assistance Services would deduct part of any incentive payment where related-party rent exceeds a fair rental value benchmark; a knowingly false disclosure would be a Class 3 misdemeanor. Continued to the 2027 session in the Senate Education and Health committee on February 5, 2026 (14-Y 1-N).",
-      "primary_source": { "label": "Virginia Legislative Information System, SB 808 (2026)", "url": "https://lis.virginia.gov/bill-details/20261/SB808" },
-      "secondary_sources": [{ "label": "Stateline / CT Mirror, June 9, 2026", "url": "https://ctmirror.org/2026/06/09/nursing-homes-private-equity/" }],
+      "primary_source": {
+        "label": "Virginia Legislative Information System, SB 808 (2026)",
+        "url": "https://lis.virginia.gov/bill-details/20261/SB808"
+      },
+      "secondary_sources": [
+        {
+          "label": "Stateline / CT Mirror, June 9, 2026",
+          "url": "https://ctmirror.org/2026/06/09/nursing-homes-private-equity/"
+        }
+      ],
       "verified_on": "2026-09-16"
     },
     {
@@ -90,12 +140,26 @@
       "status_date": "2025-01-08",
       "effective_date": "2025-04-08",
       "nursing_home_scope": "Partly",
-      "provisions": ["ownership disclosure", "transaction notice", "financial reporting", "sale-leaseback limits"],
+      "provisions": [
+        "ownership disclosure",
+        "transaction notice",
+        "financial reporting",
+        "sale-leaseback limits"
+      ],
       "summary": "Chapter 343 of the Acts of 2024. Extends the state's material-change notice and post-transaction monitoring to transactions involving private equity sponsors, significant equity investors, health care REITs and management services organizations, adds annual ownership and financial reporting to the Health Policy Commission and the Center for Health Information and Analysis, sets penalties for missed filings, and bars new sale-leasebacks of acute-care hospital real estate. Applies to health care entities and their investors as the act defines them.",
-      "primary_source": { "label": "Massachusetts General Court, H.5159 (193rd) / Acts of 2024, Chapter 343", "url": "https://malegislature.gov/Bills/193/H5159" },
+      "primary_source": {
+        "label": "Massachusetts General Court, H.5159 (193rd) / Acts of 2024, Chapter 343",
+        "url": "https://malegislature.gov/Bills/193/H5159"
+      },
       "secondary_sources": [
-        { "label": "PESP, 2025 State Healthcare Policy Review", "url": "https://legislature.vermont.gov/Documents/2026/Workgroups/House%20Health%20Care/Bills/H.583/Witness%20Testimony/H.583~Michael%20Fenne~Private%20Equity%20Oversight%20and%20Reform~1-30-2026.pdf" },
-        { "label": "Epstein Becker Green, signing summary", "url": "https://www.healthlawadvisor.com/massachusetts-governor-maura-healey-signs-into-law-a-sweeping-health-care-market-oversight-bill" }
+        {
+          "label": "PESP, 2025 State Healthcare Policy Review",
+          "url": "https://legislature.vermont.gov/Documents/2026/Workgroups/House%20Health%20Care/Bills/H.583/Witness%20Testimony/H.583~Michael%20Fenne~Private%20Equity%20Oversight%20and%20Reform~1-30-2026.pdf"
+        },
+        {
+          "label": "Epstein Becker Green, signing summary",
+          "url": "https://www.healthlawadvisor.com/massachusetts-governor-maura-healey-signs-into-law-a-sweeping-health-care-market-oversight-bill"
+        }
       ],
       "verified_on": "2026-09-16",
       "notes": "The legislature's site could not be reached from our network on the verification date; signing date, chapter and effective date are taken from the law-firm summaries of the act listed as secondary sources."
@@ -109,9 +173,16 @@
       "status_date": "2025-10-11",
       "effective_date": "2026-01-01",
       "nursing_home_scope": "Partly",
-      "provisions": ["transaction notice", "PE and hedge fund definitions", "MSO reporting"],
+      "provisions": [
+        "transaction notice",
+        "PE and hedge fund definitions",
+        "MSO reporting"
+      ],
       "summary": "Chapter 641, Statutes of 2025. Updates the Office of Health Care Affordability's definitions, adds definitions including hedge fund, requires the office to research management services organizations and set their data-submission requirements, and extends the pre-transaction written notice to the office to the entities the bill defines. Applies to health care entities and providers under the act's definitions.",
-      "primary_source": { "label": "California Legislative Information, AB 1415 (2025-2026), chaptered text", "url": "https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202520260AB1415" },
+      "primary_source": {
+        "label": "California Legislative Information, AB 1415 (2025-2026), chaptered text",
+        "url": "https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202520260AB1415"
+      },
       "verified_on": "2026-09-16",
       "notes": "California statutes chaptered in 2025 take effect January 1, 2026 unless the act says otherwise."
     },
@@ -124,9 +195,15 @@
       "status_date": "2025-10-06",
       "effective_date": "2026-01-01",
       "nursing_home_scope": "No",
-      "provisions": ["corporate practice limits", "PE and hedge fund contract limits"],
+      "provisions": [
+        "corporate practice limits",
+        "PE and hedge fund contract limits"
+      ],
       "summary": "Chapter 409, Statutes of 2025. Prohibits a private equity group or hedge fund involved with a physician or dental practice from interfering with professional judgment or exercising power over listed decisions, voids contract terms that would allow it, and voids specified non-compete and non-disparagement clauses. Physician and dental practices only.",
-      "primary_source": { "label": "California Legislative Information, SB 351 (2025-2026), chaptered text", "url": "https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202520260SB351" },
+      "primary_source": {
+        "label": "California Legislative Information, SB 351 (2025-2026), chaptered text",
+        "url": "https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202520260SB351"
+      },
       "verified_on": "2026-09-16"
     },
     {
@@ -138,9 +215,16 @@
       "status_date": "2025-05-06",
       "effective_date": null,
       "nursing_home_scope": "Partly",
-      "provisions": ["ownership disclosure", "annual public report", "merger and acquisition definitions"],
+      "provisions": [
+        "ownership disclosure",
+        "annual public report",
+        "merger and acquisition definitions"
+      ],
       "summary": "Public Law 239-2025. Requires hospitals to report ownership information to the Indiana Department of Health, certain health care entities to the Secretary of State, and insurers, third-party administrators and pharmacy benefit managers to the Department of Insurance; the Department of Health must publish an annual ownership report; amends the health care entity definition for merger and acquisition review and expands the Attorney General's role. Applies to the health care entities the act defines.",
-      "primary_source": { "label": "Indiana General Assembly, HB 1666 (2025)", "url": "https://iga.in.gov/legislative/2025/bills/house/1666/details" },
+      "primary_source": {
+        "label": "Indiana General Assembly, HB 1666 (2025)",
+        "url": "https://iga.in.gov/legislative/2025/bills/house/1666/details"
+      },
       "verified_on": "2026-09-16"
     },
     {
@@ -152,9 +236,15 @@
       "status_date": null,
       "effective_date": null,
       "nursing_home_scope": "No",
-      "provisions": ["corporate practice limits", "MSO ownership limits"],
+      "provisions": [
+        "corporate practice limits",
+        "MSO ownership limits"
+      ],
       "summary": "Oregon Laws 2025, Chapter 295. Prohibits a management services organization, or its shareholders, directors, officers or employees, from owning or controlling shares in, serving as an officer or director of, or managing a professional medical entity it has a management contract with, and voids related restrictive covenants. Physician practices, not long-term care facilities.",
-      "primary_source": { "label": "Oregon Legislative Information System, SB 951 (2025)", "url": "https://olis.oregonlegislature.gov/liz/2025R1/Measures/Overview/SB951" },
+      "primary_source": {
+        "label": "Oregon Legislative Information System, SB 951 (2025)",
+        "url": "https://olis.oregonlegislature.gov/liz/2025R1/Measures/Overview/SB951"
+      },
       "verified_on": "2026-09-16",
       "notes": "The OLIS overview records the chapter number; the signing date is in the measure history."
     },
@@ -167,9 +257,15 @@
       "status_date": "2025-04-07",
       "effective_date": null,
       "nursing_home_scope": "Partly",
-      "provisions": ["transaction notice", "transaction review"],
+      "provisions": [
+        "transaction notice",
+        "transaction review"
+      ],
       "summary": "Laws 2025, Chapter 50. Extends the state's health care transaction notice and review framework (built on the 2024 Health Care Consolidation Oversight Act) to additional provider types and makes it permanent, with review by the Health Care Authority. Applies to the provider types the act lists.",
-      "primary_source": { "label": "New Mexico Legislature, HB 586 (2025)", "url": "https://www.nmlegis.gov/Legislation/Legislation?Chamber=H&LegType=B&LegNo=586&year=25" },
+      "primary_source": {
+        "label": "New Mexico Legislature, HB 586 (2025)",
+        "url": "https://www.nmlegis.gov/Legislation/Legislation?Chamber=H&LegType=B&LegNo=586&year=25"
+      },
       "verified_on": "2026-09-16"
     },
     {
@@ -181,9 +277,15 @@
       "status_date": "2025-04-22",
       "effective_date": "2025-07-27",
       "nursing_home_scope": "Partly",
-      "provisions": ["ownership registry", "affiliation disclosure"],
+      "provisions": [
+        "ownership registry",
+        "affiliation disclosure"
+      ],
       "summary": "Chapter 142, Laws of 2025. Creates a statewide registry of health care entities and their ownership and affiliations, maintained by the state, so consolidation and investor ownership can be mapped. Applies to health care entities as the act defines them.",
-      "primary_source": { "label": "Washington State Legislature, HB 1686 (2025-26) bill summary", "url": "https://app.leg.wa.gov/billsummary?BillNumber=1686&Year=2025&Initiative=false" },
+      "primary_source": {
+        "label": "Washington State Legislature, HB 1686 (2025-26) bill summary",
+        "url": "https://app.leg.wa.gov/billsummary?BillNumber=1686&Year=2025&Initiative=false"
+      },
       "verified_on": "2026-09-16"
     },
     {
@@ -195,9 +297,14 @@
       "status_date": "2025-06-22",
       "effective_date": "2025-06-22",
       "nursing_home_scope": "No",
-      "provisions": ["PE/REIT acquisition moratorium"],
+      "provisions": [
+        "PE/REIT acquisition moratorium"
+      ],
       "summary": "Public Law 2025, Chapter 401. Emergency measure imposing a one-year moratorium on hospital acquisitions by private equity firms or real estate investment trusts; became law without the Governor's signature (recorded as 'Emergency Unsigned') on June 22, 2025. Hospitals only.",
-      "primary_source": { "label": "Maine Legislature, LD 985 (SP 416), 132nd Legislature", "url": "https://legislature.maine.gov/legis/bills/display_ps.asp?LD=985&snum=132" },
+      "primary_source": {
+        "label": "Maine Legislature, LD 985 (SP 416), 132nd Legislature",
+        "url": "https://legislature.maine.gov/legis/bills/display_ps.asp?LD=985&snum=132"
+      },
       "verified_on": "2026-09-16"
     },
     {
@@ -209,12 +316,25 @@
       "status_date": "2025-06-10",
       "effective_date": null,
       "nursing_home_scope": "Partly",
-      "provisions": ["sale-leaseback ban", "transaction review", "Attorney General authority"],
+      "provisions": [
+        "sale-leaseback ban",
+        "transaction review",
+        "Attorney General authority"
+      ],
       "summary": "Would ban sale-leaseback transactions by health care facilities, let the Attorney General review mergers and acquisitions involving private equity and other for-profit entities and block those against the public interest, and, per the Governor's office, protect hospitals, nursing homes and other care facilities. Passed the House 121-82 on June 10, 2025; in the Senate as of the last check.",
-      "primary_source": { "label": "Pennsylvania General Assembly, HB 1460 (2025-2026)", "url": "https://www.palegis.us/legislation/bills/2025/hb1460" },
+      "primary_source": {
+        "label": "Pennsylvania General Assembly, HB 1460 (2025-2026)",
+        "url": "https://www.palegis.us/legislation/bills/2025/hb1460"
+      },
       "secondary_sources": [
-        { "label": "Office of the Governor of Pennsylvania, press release on the plan and HB 1460", "url": "https://www.pa.gov/governor/newsroom/2025-press-releases/icymi--gov-shapiro-plan-stop-private-equity-gutting-health-care-" },
-        { "label": "WHYY, House passage", "url": "https://whyy.org/articles/pennsylvania-health-care-private-equity-oversight-bill/" }
+        {
+          "label": "Office of the Governor of Pennsylvania, press release on the plan and HB 1460",
+          "url": "https://www.pa.gov/governor/newsroom/2025-press-releases/icymi--gov-shapiro-plan-stop-private-equity-gutting-health-care-"
+        },
+        {
+          "label": "WHYY, House passage",
+          "url": "https://whyy.org/articles/pennsylvania-health-care-private-equity-oversight-bill/"
+        }
       ],
       "verified_on": "2026-09-16",
       "notes": "The General Assembly's site could not be reached from our network on the verification date; the House vote and date are from the Governor's office and press coverage. Senate action after June 2025 not confirmed."
