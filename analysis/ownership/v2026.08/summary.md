@@ -47,8 +47,8 @@ CMS leaves the organization name blank on some rows; those are grouped as *Name 
 - CA: 4 (0.3% of the state's facilities)
 - OH: 4 (0.4% of the state's facilities)
 - OR: 4 (3.1% of the state's facilities)
-- NV: 3 (4.5% of the state's facilities)
 - IA: 3 (0.8% of the state's facilities)
+- NV: 3 (4.5% of the state's facilities)
 
 ## Changes of ownership by effective year (PECOS)
 

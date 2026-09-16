@@ -18,6 +18,7 @@ First release built by `tcr-open-data` 0.1.0. Archived at Zenodo: DOI 10.5281/ze
 
 - `tcr-open-data ownership-study`: the descriptive tables behind the ownership report from a release and the history store, committed under `analysis/ownership/<release>/` with `summary.md` and `study.json`.
 - Care Compare role labels are mapped to role families (`ROLE_FAMILIES`) so the three CMS relabels (2024-12, 2025-06, 2026-05) and the 2026-only disclosure categories do not count as owner turnover; `carecompare_role_labels.csv` documents every label and its vintages.
+- Chain profiles: the study writes `site/chains/index.json` and one JSON per CMS-identified chain (`chain_profiles.py`) for the `/data/chains/` pages; `tcr-open-data publish-analysis` uploads a study run to `analysis/<study>/<release>/` and points `analysis/<study>/latest.json` at it.
 
 ## History store (built September 15, 2026)
 

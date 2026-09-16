@@ -15,6 +15,7 @@ Command line: download, build, validate, publish, or run the whole release.
     tcr-open-data cors [--live]                             # apply infra/r2-cors.json (GET/HEAD only)
     tcr-open-data doi --release releases/v2026.08 [--sandbox] [--publish] [--concept-record-id N]
     tcr-open-data ownership-study --release releases/v2026.08 [--history history] --out analysis/ownership/v2026.08
+    tcr-open-data publish-analysis --dir analysis/ownership/v2026.08 [--live]
 """
 
 from __future__ import annotations
@@ -32,7 +33,7 @@ from .history import backfill, consolidate, list_snapshots, reharmonize
 from .manifest import write_release_manifest
 from .ownership_study import run_study
 from .sff import Capture, build_sff_history, fetch_capture, list_captures
-from .storage import R2Config, publish, publish_history, put_cors, retag_objects
+from .storage import R2Config, publish, publish_analysis, publish_history, put_cors, retag_objects
 from .validate import validate_release
 from .zenodo import deposit_release, token_from_env
 
@@ -169,6 +170,12 @@ def cmd_publish_history(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_publish_analysis(args: argparse.Namespace) -> int:
+    summary = publish_analysis(Path(args.dir), dry_run=not args.live, config=R2Config.from_env())
+    print(json.dumps(summary, indent=2))
+    return 0
+
+
 def cmd_headers(args: argparse.Namespace) -> int:
     summary = retag_objects(R2Config.from_env(), prefix=args.prefix, dry_run=not args.live)
     print(json.dumps(summary, indent=2))
@@ -277,6 +284,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--history", default="history")
     p.add_argument("--live", action="store_true")
     p.set_defaults(func=cmd_publish_history)
+
+    p = sub.add_parser("publish-analysis", help="Upload one study run (analysis/<study>/<release>/) to R2 and point analysis/<study>/latest.json at it (dry run unless --live)")
+    p.add_argument("--dir", required=True, help="Study run directory, e.g. analysis/ownership/v2026.08")
+    p.add_argument("--live", action="store_true")
+    p.set_defaults(func=cmd_publish_analysis)
 
     p = sub.add_parser("headers", help="Rewrite Content-Type and Cache-Control on objects already in the research store (dry run unless --live)")
     p.add_argument("--prefix", default="", help="Only objects under this key prefix, e.g. releases/ or history/")

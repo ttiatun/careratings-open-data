@@ -1,6 +1,6 @@
 {
   "release": "v2026.08",
-  "built_at": "2026-09-16T16:32:52.991719+00:00",
+  "built_at": "2026-09-16T16:41:30.679638+00:00",
   "builder": {
     "name": "tcr-open-data",
     "version": "0.1.0"
@@ -225,6 +225,13 @@
         "provider_name",
         "state",
         "detail"
+      ]
+    },
+    "site/chains": {
+      "rows": 610,
+      "columns": [
+        "index.json",
+        "<chain_id>.json"
       ]
     }
   }
