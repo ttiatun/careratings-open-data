@@ -55,3 +55,14 @@ The app reads the private store through the S3 API: set `TCR_R2_ACCOUNT_ID`, `TC
 ## 7. Going public
 
 Flip this repository to public only after counsel has read `LICENSE-DATA.md`. Until then the download pages work regardless: the store, not the repository, serves the files.
+
+## 8. Publishing a study run
+
+After `tcr-open-data ownership-study --release releases/<release> --history history --out analysis/ownership/<release>`, upload the tables and the site files and point the site at them:
+
+```bash
+tcr-open-data publish-analysis --dir analysis/ownership/<release>          # dry run: lists the objects
+tcr-open-data publish-analysis --dir analysis/ownership/<release> --live
+```
+
+This writes `analysis/ownership/<release>/...` and `analysis/ownership/latest.json` in the bucket. The `/data/chains/` pages read `latest.json` first, so a corrected run of the same release simply replaces the objects. The per-chain site files are build output (`analysis/**/site/` is git-ignored); the CSV tables and `summary.md` are committed.

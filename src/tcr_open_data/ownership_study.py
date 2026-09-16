@@ -27,6 +27,7 @@ Outputs (CSV unless noted):
   carecompare_first_seen_decomposition  the raw count of relationships first seen per year, split into relabels, added categories, extra roles and new names (history store)
   discrepancy_register    seed rows for the discrepancy register, by type
   summary.md              the headline numbers in prose, with the caveats
+  site/chains/            one JSON per CMS-identified chain plus an index, for the /data/chains/ pages (chain_profiles.py)
 """
 
 from __future__ import annotations
@@ -39,6 +40,7 @@ from pathlib import Path
 import duckdb
 
 from . import __version__
+from .chain_profiles import write_chain_profiles
 
 # Care Compare renamed its ownership roles three times (vintages 2024-12, 2025-06 and
 # 2026-05) and, with the 2026 disclosure rule, added categories that did not exist
@@ -360,6 +362,8 @@ def run_study(release_dir: Path, out_dir: Path, history_dir: Path | None = None,
         FROM facilities f WHERE f.ownership_changed_12mo AND COALESCE(f.chow_count_36mo, 0) = 0
         ORDER BY 1, 4, 2""")
 
+    site = write_chain_profiles(con, out_dir / "site", manifest)
+    results["site/chains"] = {"rows": site["chains"], "columns": ["index.json", "<chain_id>.json"]}
     summary = _summary(release, manifest, national[0] if national else None, con, discrepancies, ctx["has_history"], decomposition_rows)
     (out_dir / "summary.md").write_text(summary, encoding="utf-8")
     meta = {"release": release, "built_at": datetime.now(timezone.utc).isoformat(), "builder": {"name": "tcr-open-data", "version": __version__},

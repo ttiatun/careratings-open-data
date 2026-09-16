@@ -43,6 +43,8 @@ def cache_control(key: str) -> str:
         return CACHE_IMMUTABLE
     if key.startswith(("history/raw/", "history/harmonized/", "history/sff/raw/")):
         return CACHE_IMMUTABLE
+    if key.startswith("analysis/"):
+        return CACHE_MANIFEST  # study tables and site files are regenerated when a study is corrected
     return CACHE_REVALIDATE
 
 
@@ -94,6 +96,45 @@ def plan_history_uploads(history_dir: Path) -> list[tuple[Path, str]]:
             continue
         uploads.append((path, "history/" + path.relative_to(history_dir).as_posix()))
     return uploads
+
+
+def plan_analysis_uploads(analysis_dir: Path) -> list[tuple[Path, str]]:
+    """Every file of one study run (`analysis/<study>/<release>/`), keyed under the same path in the bucket."""
+    analysis_dir = analysis_dir.resolve()
+    study, release = analysis_dir.parent.name, analysis_dir.name
+    if analysis_dir.parent.parent.name != "analysis" or not study or not release:
+        raise ValueError(f"expected analysis/<study>/<release>, got {analysis_dir}")
+    prefix = f"analysis/{study}/{release}/"
+    return [(path, prefix + path.relative_to(analysis_dir).as_posix()) for path in sorted(analysis_dir.rglob("*"))
+            if path.is_file() and path.suffix in (".csv", ".json", ".md", ".parquet")]
+
+
+def analysis_pointer(analysis_dir: Path) -> tuple[str, dict]:
+    """The `analysis/<study>/latest.json` object the site reads to find the newest study run."""
+    analysis_dir = analysis_dir.resolve()
+    study, release = analysis_dir.parent.name, analysis_dir.name
+    meta = json.loads((analysis_dir / "study.json").read_text(encoding="utf-8")) if (analysis_dir / "study.json").exists() else {}
+    pointer = {"study": study, "release": release, "path": f"analysis/{study}/{release}/", "built_at": meta.get("built_at"),
+               "processing_date": meta.get("processing_date"), "doi": meta.get("doi"), "tables": sorted(meta.get("tables", {}))}
+    return f"analysis/{study}/latest.json", pointer
+
+
+def publish_analysis(analysis_dir: Path, dry_run: bool = True, config: R2Config | None = None, client=None) -> dict:
+    """Upload one study run and point `analysis/<study>/latest.json` at it."""
+    uploads = plan_analysis_uploads(analysis_dir)
+    pointer_key, pointer = analysis_pointer(analysis_dir)
+    summary = {"bucket": config.bucket if config else None, "objects": len(uploads), "bytes": sum(p.stat().st_size for p, _ in uploads),
+               "pointer": pointer_key, "release": pointer["release"], "dry_run": dry_run, "sample": [k for _, k in uploads[:12]]}
+    if dry_run:
+        return summary
+    if config is None:
+        raise RuntimeError("R2 configuration is missing (TCR_R2_ACCOUNT_ID, TCR_R2_ACCESS_KEY_ID, TCR_R2_SECRET_ACCESS_KEY)")
+    s3 = client or _client(config)
+    for path, key in uploads:
+        s3.upload_file(str(path), config.bucket, key, ExtraArgs=upload_args(key, path))
+    s3.put_object(Bucket=config.bucket, Key=pointer_key, Body=json.dumps(pointer, indent=2).encode("utf-8"),
+                  ContentType="application/json", CacheControl=CACHE_MANIFEST)
+    return summary
 
 
 def publish_history(history_dir: Path, dry_run: bool = True, config: R2Config | None = None, client=None) -> dict:

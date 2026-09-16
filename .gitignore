@@ -11,3 +11,4 @@ dist/
 *.egg-info/
 history/
 /manifest.json
+analysis/**/site/
