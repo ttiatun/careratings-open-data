@@ -1,0 +1,43 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='880' height='360' viewBox='0 0 880 360' role='img' aria-labelledby='t d'>
+<title id='t'>Certified nursing homes in the United States, monthly</title><desc id='d'>Facilities in the CMS Provider Information file, one point per archived monthly snapshot.</desc>
+<rect x='0.5' y='0.5' width='879' height='359' rx='10' fill='#fcfcfb' stroke='#e6e5e1'/>
+<text x='24' y='34' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='17' font-weight='700' fill='#0b0b0b'>Certified nursing homes in the United States, monthly</text>
+<text x='24' y='54' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='12.5' fill='#52514e'>Facilities in the CMS Provider Information file, one point per archived monthly snapshot.</text>
+<line x1='64' x2='704' y1='300.0' y2='300.0' stroke='#ecebe7'/>
+<text x='56' y='304.0' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='11' fill='#898781' text-anchor='end'>14,400</text>
+<line x1='64' x2='704' y1='268.0' y2='268.0' stroke='#ecebe7'/>
+<text x='56' y='272.0' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='11' fill='#898781' text-anchor='end'>14,600</text>
+<line x1='64' x2='704' y1='236.0' y2='236.0' stroke='#ecebe7'/>
+<text x='56' y='240.0' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='11' fill='#898781' text-anchor='end'>14,800</text>
+<line x1='64' x2='704' y1='204.0' y2='204.0' stroke='#ecebe7'/>
+<text x='56' y='208.0' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='11' fill='#898781' text-anchor='end'>15,000</text>
+<line x1='64' x2='704' y1='172.0' y2='172.0' stroke='#ecebe7'/>
+<text x='56' y='176.0' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='11' fill='#898781' text-anchor='end'>15,200</text>
+<line x1='64' x2='704' y1='140.0' y2='140.0' stroke='#ecebe7'/>
+<text x='56' y='144.0' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='11' fill='#898781' text-anchor='end'>15,400</text>
+<line x1='64' x2='704' y1='108.0' y2='108.0' stroke='#ecebe7'/>
+<text x='56' y='112.0' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='11' fill='#898781' text-anchor='end'>15,600</text>
+<line x1='64' x2='704' y1='76.0' y2='76.0' stroke='#ecebe7'/>
+<text x='56' y='80.0' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='11' fill='#898781' text-anchor='end'>15,800</text>
+<line x1='144.4' x2='144.4' y1='300' y2='304' stroke='#898781'/>
+<text x='144.4' y='318' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='11' fill='#898781' text-anchor='middle'>2020</text>
+<line x1='228.7' x2='228.7' y1='300' y2='304' stroke='#898781'/>
+<text x='228.7' y='318' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='11' fill='#898781' text-anchor='middle'>2021</text>
+<line x1='312.8' x2='312.8' y1='300' y2='304' stroke='#898781'/>
+<text x='312.8' y='318' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='11' fill='#898781' text-anchor='middle'>2022</text>
+<line x1='396.9' x2='396.9' y1='300' y2='304' stroke='#898781'/>
+<text x='396.9' y='318' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='11' fill='#898781' text-anchor='middle'>2023</text>
+<line x1='481.0' x2='481.0' y1='300' y2='304' stroke='#898781'/>
+<text x='481.0' y='318' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='11' fill='#898781' text-anchor='middle'>2024</text>
+<line x1='565.3' x2='565.3' y1='300' y2='304' stroke='#898781'/>
+<text x='565.3' y='318' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='11' fill='#898781' text-anchor='middle'>2025</text>
+<line x1='649.4' x2='649.4' y1='300' y2='304' stroke='#898781'/>
+<text x='649.4' y='318' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='11' fill='#898781' text-anchor='middle'>2026</text>
+<line x1='64' x2='704' y1='300' y2='300' stroke='#898781'/>
+<path d='M64.0,111.5 L69.3,111.4 L75.7,111.2 L82.9,113.9 L89.8,117.9 L96.9,119.7 L103.9,119.2 L111.0,122.1 L118.1,122.2 L125.1,125.4 L140.9,128.6 L146.2,131.4 L153.4,132.0 L160.1,132.6 L167.2,134.2 L174.1,135.7 L183.1,136.6 L188.2,139.4 L195.3,143.7 L202.5,146.2 L209.4,148.0 L219.3,148.3 L226.2,148.3 L234.7,149.6 L241.9,151.0 L248.3,151.0 L255.4,151.5 L262.4,153.6 L269.5,155.7 L276.4,156.3 L283.6,158.7 L290.7,161.4 L297.6,160.8 L304.7,160.8 L311.7,161.8 L318.8,165.9 L325.9,168.2 L332.4,169.4 L339.5,171.5 L346.4,172.5 L353.6,173.6 L360.5,175.5 L367.6,177.0 L374.8,179.8 L381.7,180.5 L388.8,180.5 L390.0,182.2 L397.1,186.9 L408.7,189.6 L410.7,190.9 L423.4,191.8 L431.2,196.6 L437.7,201.1 L444.1,202.4 L452.4,205.1 L453.1,211.0 L460.0,213.0 L467.2,213.0 L478.5,216.2 L487.9,219.0 L494.6,221.1 L501.0,223.5 L507.5,226.4 L515.3,226.7 L521.8,228.8 L529.8,230.6 L536.5,232.0 L543.0,233.3 L550.8,233.8 L552.6,233.8 L562.5,234.9 L578.2,238.9 L584.7,239.4 L592.7,241.0 L599.2,242.6 L605.6,243.4 L613.7,243.7 L626.6,243.7 L639.7,248.6 L645.5,248.6 L652.4,249.9 L662.1,250.4 L668.5,251.5 L676.6,252.2 L683.0,252.0 L689.5,252.8 L697.5,253.1 L699.4,253.1 L704.0,253.6' fill='none' stroke='#2a78d6' stroke-width='2' stroke-linejoin='round' stroke-linecap='round'/>
+<circle cx='64.0' cy='111.5' r='4' fill='#2a78d6' stroke='#fcfcfb' stroke-width='2'/>
+<circle cx='704.0' cy='253.6' r='4' fill='#2a78d6' stroke='#fcfcfb' stroke-width='2'/>
+<text x='714' y='257.6' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='12' font-weight='600' fill='#0b0b0b'>14,690 in Aug 2026</text>
+<text x='72.0' y='103.5' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='11' fill='#52514e'>15,578 in Jan 2019</text>
+<text x='856' y='339' font-family='ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif' font-size='11' fill='#898781' text-anchor='end'>Source: CMS Care Compare archive via facilities_history</text>
+</svg>

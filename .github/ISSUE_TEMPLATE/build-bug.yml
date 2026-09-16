@@ -1,0 +1,29 @@
+name: Build bug
+description: The pipeline fails, or a CMS header change slipped past the guards
+title: "[build] "
+labels: ["bug"]
+body:
+  - type: input
+    id: command
+    attributes:
+      label: Command you ran
+      placeholder: tcr-open-data release --strict
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Package version and Python version
+      placeholder: tcr-open-data 0.1.0, Python 3.12
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: The error and the lines before it.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else

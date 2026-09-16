@@ -112,9 +112,9 @@ CMS renamed the columns twice. The harmonizer maps each canonical column to whic
 
 | Era | Snapshots | Example names |
 | --- | --- | --- |
-| 1 | 2019-01 to 2020-09 | `PROVNUM`, `PROVNAME`, `OVERALL_RATING`, `FINE_TOT`, `FILEDATE` |
-| 2 | 2020-10 to 2023-09 | `Federal Provider Number`, `Provider City`, `Provider State` |
-| 3 | 2023-10 onward | `CMS Certification Number (CCN)`, `City/Town`, `State` |
+| 1 | 2019-01 to 2020-07 (vintages through July 2020) | `PROVNUM`, `PROVNAME`, `OVERALL_RATING`, `FINE_TOT`, `FILEDATE` |
+| 2 | 2020-08 to 2023-05 (August 2020 to May 2023 vintages) | `Federal Provider Number`, `Provider City`, `Provider State` |
+| 3 | 2023-06 onward (June 2023 vintage and later) | `CMS Certification Number (CCN)`, `City/Town`, `State` |
 
 Columns that a snapshot does not carry are NULL in the harmonized file and listed per snapshot in `history/coverage.csv` (`unmapped_canonical`). Columns the map does not know are kept in the raw file and listed as `unused_source`. Notable gaps and renames:
 
