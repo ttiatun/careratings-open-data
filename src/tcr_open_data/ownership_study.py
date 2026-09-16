@@ -225,11 +225,11 @@ def run_study(release_dir: Path, out_dir: Path, history_dir: Path | None = None,
 
     emit("quality_by_disclosure", f"""
         SELECT {DISCLOSURE_GROUP} AS disclosure_group, {QUALITY_MEASURES}
-        FROM facilities GROUP BY 1 ORDER BY facilities DESC""")
+        FROM facilities GROUP BY 1 ORDER BY facilities DESC, disclosure_group""")
 
     emit("quality_by_disclosure_for_profit", f"""
         SELECT {DISCLOSURE_GROUP} AS disclosure_group, {QUALITY_MEASURES}
-        FROM facilities WHERE ownership_category = 'For profit' GROUP BY 1 ORDER BY facilities DESC""")
+        FROM facilities WHERE ownership_category = 'For profit' GROUP BY 1 ORDER BY facilities DESC, disclosure_group""")
 
     emit("top_private_equity_owners", f"""
         SELECT COALESCE(NULLIF(trim(owner_organization_name), ''), NULLIF(trim(owner_dba_name), ''), NULLIF(trim(concat_ws(' ', owner_first_name, owner_last_name)), ''), 'Name not published in the CMS file') AS owner,
@@ -237,7 +237,7 @@ def run_study(release_dir: Path, out_dir: Path, history_dir: Path | None = None,
                COUNT(DISTINCT f.state) AS states,
                string_agg(DISTINCT f.state, ' ' ORDER BY f.state) AS state_list,
                ROUND(AVG(f.overall_rating), 2) AS avg_overall_rating,
-               string_agg(DISTINCT p.role_text, '; ') AS roles
+               string_agg(DISTINCT p.role_text, '; ' ORDER BY p.role_text) AS roles
         FROM owners_pecos p JOIN facilities f USING (ccn)
         WHERE p.is_private_equity_company AND p.is_owner_role
         GROUP BY 1 ORDER BY facilities DESC, owner LIMIT {top_n}""")
@@ -248,7 +248,7 @@ def run_study(release_dir: Path, out_dir: Path, history_dir: Path | None = None,
                COUNT(DISTINCT f.state) AS states,
                SUM(CASE WHEN p.is_owner_role THEN 1 ELSE 0 END) AS owner_role_rows,
                SUM(CASE WHEN NOT p.is_owner_role THEN 1 ELSE 0 END) AS other_party_rows,
-               string_agg(DISTINCT p.role_text, '; ') AS roles
+               string_agg(DISTINCT p.role_text, '; ' ORDER BY p.role_text) AS roles
         FROM owners_pecos p JOIN facilities f USING (ccn)
         WHERE p.is_reit
         GROUP BY 1 ORDER BY facilities DESC, organization LIMIT {top_n}""")
@@ -262,7 +262,7 @@ def run_study(release_dir: Path, out_dir: Path, history_dir: Path | None = None,
                SUM(f.has_reit_party::INT) AS reit_party_facilities,
                SUM(CASE WHEN f.chow_count_36mo >= 1 THEN 1 ELSE 0 END) AS facilities_with_chow_36mo
         FROM chains c LEFT JOIN facilities f ON f.chain_id = c.chain_id
-        GROUP BY ALL ORDER BY c.facility_count DESC LIMIT {top_n * 2}""")
+        GROUP BY ALL ORDER BY c.facility_count DESC, c.chain_name LIMIT {top_n * 2}""")
 
     emit("chow_by_year", """
         SELECT year(effective_date) AS year, chow_type_text, COUNT(*) AS changes_of_ownership,
@@ -276,7 +276,7 @@ def run_study(release_dir: Path, out_dir: Path, history_dir: Path | None = None,
                f.facilities_with_chow_36mo
         FROM state_summary s
         LEFT JOIN (SELECT state, SUM(CASE WHEN chow_count_36mo >= 1 THEN 1 ELSE 0 END) AS facilities_with_chow_36mo FROM facilities GROUP BY state) f USING (state)
-        WHERE s.state <> 'US' ORDER BY chow_12mo_per_100_facilities DESC NULLS LAST""")
+        WHERE s.state <> 'US' ORDER BY chow_12mo_per_100_facilities DESC NULLS LAST, s.state""")
 
     decomposition_rows: list[tuple] = []
     if ctx["has_history"]:
@@ -379,11 +379,11 @@ def _summary(release: str, manifest: dict, national: tuple | None, con: duckdb.D
         "release", "facilities", "certified_beds", "facilities_with_pecos_enrollment", "pe_owner_facilities", "pe_owner_pct", "pe_owner_beds",
         "reit_owner_facilities", "reit_owner_pct", "pe_party_facilities", "pe_party_pct", "reit_party_facilities", "reit_party_pct", "reit_party_beds",
         "for_profit_pct", "chain_pct", "facilities_with_chow_36mo", "facilities_with_2plus_chow_36mo", "facilities_ownership_changed_12mo"], national or []))
-    groups = _run(con, f"SELECT {DISCLOSURE_GROUP} AS g, COUNT(*), ROUND(AVG(overall_rating), 2), ROUND(100.0 * AVG(CASE WHEN COALESCE(total_penalties,0) > 0 THEN 1 ELSE 0 END), 1), ROUND(AVG(reported_total_nurse_hprd), 2) FROM facilities GROUP BY 1 ORDER BY 2 DESC")[1]
-    top_pe = _run(con, "SELECT COALESCE(NULLIF(trim(owner_organization_name), ''), NULLIF(trim(owner_dba_name), ''), NULLIF(trim(concat_ws(' ', owner_first_name, owner_last_name)), ''), 'Name not published in the CMS file') o, COUNT(DISTINCT ccn) n FROM owners_pecos WHERE is_private_equity_company AND is_owner_role GROUP BY 1 ORDER BY n DESC LIMIT 5")[1]
-    top_reit = _run(con, "SELECT COALESCE(NULLIF(trim(owner_organization_name), ''), NULLIF(trim(owner_dba_name), ''), NULLIF(trim(concat_ws(' ', owner_first_name, owner_last_name)), ''), 'Name not published in the CMS file') o, COUNT(DISTINCT ccn) n FROM owners_pecos WHERE is_reit GROUP BY 1 ORDER BY n DESC LIMIT 5")[1]
+    groups = _run(con, f"SELECT {DISCLOSURE_GROUP} AS g, COUNT(*), ROUND(AVG(overall_rating), 2), ROUND(100.0 * AVG(CASE WHEN COALESCE(total_penalties,0) > 0 THEN 1 ELSE 0 END), 1), ROUND(AVG(reported_total_nurse_hprd), 2) FROM facilities GROUP BY 1 ORDER BY 2 DESC, 1")[1]
+    top_pe = _run(con, "SELECT COALESCE(NULLIF(trim(owner_organization_name), ''), NULLIF(trim(owner_dba_name), ''), NULLIF(trim(concat_ws(' ', owner_first_name, owner_last_name)), ''), 'Name not published in the CMS file') o, COUNT(DISTINCT ccn) n FROM owners_pecos WHERE is_private_equity_company AND is_owner_role GROUP BY 1 ORDER BY n DESC, o LIMIT 5")[1]
+    top_reit = _run(con, "SELECT COALESCE(NULLIF(trim(owner_organization_name), ''), NULLIF(trim(owner_dba_name), ''), NULLIF(trim(concat_ws(' ', owner_first_name, owner_last_name)), ''), 'Name not published in the CMS file') o, COUNT(DISTINCT ccn) n FROM owners_pecos WHERE is_reit GROUP BY 1 ORDER BY n DESC, o LIMIT 5")[1]
     chow_years = _run(con, "SELECT year(effective_date), COUNT(*) FROM changes_of_ownership WHERE effective_date IS NOT NULL GROUP BY 1 ORDER BY 1")[1]
-    top_states = _run(con, "SELECT state, SUM(has_private_equity_owner::INT) n, ROUND(100.0*AVG(has_private_equity_owner::INT),1) p FROM facilities GROUP BY 1 HAVING n > 0 ORDER BY n DESC LIMIT 8")[1]
+    top_states = _run(con, "SELECT state, SUM(has_private_equity_owner::INT) n, ROUND(100.0*AVG(has_private_equity_owner::INT),1) p FROM facilities GROUP BY 1 HAVING n > 0 ORDER BY n DESC, state LIMIT 8")[1]
     issue_counts: dict[str, int] = {}
     for row in discrepancies:
         issue_counts[row[0]] = issue_counts.get(row[0], 0) + 1
