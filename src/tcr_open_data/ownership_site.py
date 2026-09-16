@@ -115,6 +115,15 @@ def _numeric(rows: list[dict]) -> list[dict]:
     return out
 
 
+def _category_counts(discrepancies: list[tuple]) -> list[dict]:
+    """Rows per (issue, ownership category), so a page can say how many of a check's rows are non-profit or government homes."""
+    counts: dict[tuple[str, str], int] = {}
+    for row in discrepancies:
+        key = (row[0], row[4] if len(row) > 4 and row[4] else "Unknown")
+        counts[key] = counts.get(key, 0) + 1
+    return [{"issue": issue, "ownership_category": category, "facilities": n} for (issue, category), n in sorted(counts.items())]
+
+
 def write_ownership_site(con: duckdb.DuckDBPyConnection, out_dir: Path, tables_dir: Path, manifest: dict, discrepancies: list[tuple]) -> dict:
     """Write `<out_dir>/ownership.json` and `<out_dir>/discrepancy_register.json` from the study tables and the release views."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -146,8 +155,12 @@ def write_ownership_site(con: duckdb.DuckDBPyConnection, out_dir: Path, tables_d
         "top_reit_parties": _numeric(_csv_records(tables_dir / "top_reit_parties.csv")),
         "chow_by_year": _numeric(_csv_records(tables_dir / "chow_by_year.csv")),
         "ownership_change_trend": _numeric(_csv_records(tables_dir / "ownership_change_trend.csv")),
+        "chains_with_disclosures": _numeric(_csv_records(tables_dir / "chains_with_disclosures.csv")),
+        "carecompare_owner_turnover": _numeric(_csv_records(tables_dir / "carecompare_owner_turnover.csv")),
+        "carecompare_first_seen_decomposition": [r for r in _numeric(_csv_records(tables_dir / "carecompare_first_seen_decomposition.csv")) if (r.get("year") or 0) >= 2023],
         "states": states,
         "discrepancy_counts": [{"issue": i["issue"], "description": i["description"], "facilities": issue_counts.get(i["issue"], 0)} for i in DISCREPANCY_ISSUES],
+        "discrepancy_by_category": _category_counts(discrepancies),
     }
     (out_dir / "ownership.json").write_text(json.dumps(ownership, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
