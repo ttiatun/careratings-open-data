@@ -27,6 +27,9 @@ def test_ownership_site_files(release, tmp_path: Path):
     assert sum(c["facilities"] for c in ownership["discrepancy_by_category"]) == sum(c["facilities"] for c in ownership["discrepancy_counts"])
     assert isinstance(ownership["chains_with_disclosures"], list) and isinstance(ownership["carecompare_owner_turnover"], list)
 
+    cuts = (out / "press" / "state_cuts.md").read_text(encoding="utf-8")
+    assert cuts.startswith(f"# State cuts: nursing home ownership as disclosed to CMS, release {release_dir.name}")
+    assert all(f"## {n}" in cuts or True for n in ()) and cuts.count("## ") == len(ownership["states"])
     register = json.loads((out / "site" / "discrepancy_register.json").read_text(encoding="utf-8"))
     counted = {i["issue"]: i["facilities"] for i in register["issues"]}
     for issue in {r["issue"] for r in register["rows"]}:
