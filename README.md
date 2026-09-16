@@ -23,7 +23,7 @@ Every column is tagged with its provenance (`cms` or `tcr`) in the [codebook](do
 
 Releases are named after the year and month of the Care Compare Provider Information processing date (`v2026.08`) and stored in the research store under `releases/<release>/`, with the CMS files they were built from under `raw/<release>/` and a root `manifest.json` that lists every release. Each release ships `manifest.json` (files, SHA-256 checksums, row counts, source vintages, validation report), `codebook.md`, `methodology.md`, `LICENSE-DATA.md` and `CHANGELOG.md`.
 
-Download pages: <https://thecareratings.com/data/>. Files are served from the research store at `https://data.thecareratings.com/` (`manifest.json` at the root lists every release; `releases/<release>/manifest.json` lists every file with its SHA-256).
+Download pages: <https://thecareratings.com/data/>. Downloads there ask for an email address and a human check the first time, then hand out short-lived signed links from the private research store. The same files, with the same checksums, can be downloaded without either from the Zenodo archive of each release (v2026.08: <https://zenodo.org/records/22780105>). `manifest.json` in each release lists every file with its SHA-256.
 
 ## Build it yourself
 
@@ -50,7 +50,7 @@ Validation reconciles the release with the national row of the CMS chain file (f
 
 Releases are published to a dedicated Cloudflare R2 bucket through the S3 API. Configure `TCR_R2_ACCOUNT_ID`, `TCR_R2_ACCESS_KEY_ID`, `TCR_R2_SECRET_ACCESS_KEY` and optionally `TCR_R2_BUCKET` (default `careratings-open-data`). The GitHub Actions workflow `build-release.yml` runs the build monthly and publishes when those secrets are configured.
 
-The bucket is read through the custom domain `data.thecareratings.com` with a GET/HEAD-only CORS policy (`infra/r2-cors.json`, applied with `tcr-open-data cors --live`); release and raw objects are uploaded as immutable, manifests revalidate every five minutes (`tcr-open-data headers --live` rewrites those headers on objects already stored). Each release is archived at Zenodo for a DOI (`tcr-open-data doi`). Step by step: [docs/publishing.md](docs/publishing.md).
+The bucket is private. The website reads it through the S3 API with a read-only token and issues signed download links behind its gate; the custom domain `data.thecareratings.com` exists but has public access disabled. Release and raw objects are uploaded as immutable, manifests revalidate every five minutes (`tcr-open-data headers --live` rewrites those headers on objects already stored). Each release is archived at Zenodo for a DOI (`tcr-open-data doi`), and Zenodo is the ungated public copy. Step by step: [docs/publishing.md](docs/publishing.md).
 
 ## What the history store shows
 

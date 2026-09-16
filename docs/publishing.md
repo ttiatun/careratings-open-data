@@ -16,7 +16,9 @@ tcr-open-data headers --prefix releases/ --live
 tcr-open-data headers --prefix history/ --live
 ```
 
-## 2. Serve the bucket on `data.thecareratings.com` (dashboard, once)
+## 2. The custom domain `data.thecareratings.com` (dashboard, once)
+
+**Decision (September 2026): downloads are gated.** The website serves signed, short-lived links from the private bucket after an email address and a Turnstile check; Zenodo is the ungated copy. Keep the custom domain connected (it proves ownership and keeps the option open) but set its **Access** to **Disabled** once the gated site is deployed. The steps below describe the public configuration for reference.
 
 1. Cloudflare dashboard → R2 → `careratings-open-data` → **Settings** → **Custom Domains** → **Connect Domain** → `data.thecareratings.com`. The `thecareratings.com` zone must be on the same Cloudflare account; Cloudflare adds the DNS record and a certificate. This makes the bucket publicly readable on that hostname only.
 2. Leave **Public Development URL** (`r2.dev`) disabled; it is rate-limited and not for production.
@@ -34,7 +36,7 @@ If the API token cannot set bucket configuration (`AccessDenied`), paste `infra/
 
 ## 4. Site configuration
 
-The app reads the store at `PUBLIC_OPEN_DATA_BASE_URL` (default `https://data.thecareratings.com`). Set `PUBLIC_OPEN_DATA_DOI` in Vercel to the **concept DOI** once Zenodo has minted it (step 5) so every page can cite it before a release-specific DOI is in its manifest.
+The app reads the private store through the S3 API: set `TCR_R2_ACCOUNT_ID`, `TCR_R2_ACCESS_KEY_ID` and `TCR_R2_SECRET_ACCESS_KEY` in Vercel (create a separate **read-only** R2 token scoped to the bucket for the site; the read-write token stays with the pipeline). `PUBLIC_OPEN_DATA_BASE_URL` is only used when those keys are absent. The concept DOI is recorded in the site's code; `PUBLIC_OPEN_DATA_DOI` overrides it.
 
 ## 5. DOI at Zenodo
 
