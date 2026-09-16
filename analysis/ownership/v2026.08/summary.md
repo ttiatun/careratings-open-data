@@ -78,6 +78,24 @@ CMS leaves the organization name blank on some rows; those are grouped as *Name 
 
 Even on that basis the series breaks in 2025: names first seen jump in the 2025-11 and 2026-02 vintages, almost all of them in the operational/managerial control family (`carecompare_owner_turnover_by_family.csv`). That is the arrival of the fuller disclosures required by the 2023 SNF ownership rule on the revised Form CMS-855A, not a wave of facilities changing hands, so counts before and after 2025 are not comparable and no report should describe the rise as turnover. The PECOS change-of-ownership file (`chow_by_year.csv`) is the measure of facilities changing hands.
 
+### Where the raw counts come from
+
+Counted on the label CMS printed, the relationships first seen per year look like this (`carecompare_first_seen_decomposition.csv`). Only *New name at the facility* is a candidate for a new owner relationship, and even that row carries the 2025 disclosure wave.
+
+| Year | Component | Relationships | Share of year |
+| --- | --- | ---: | ---: |
+| 2024 | Same name and role family, new CMS label | 54,832 | 72.8% |
+| 2024 | New name at the facility | 19,129 | 25.4% |
+| 2024 | Name already listed at the facility, additional role family | 1,317 | 1.7% |
+| 2025 | New name at the facility | 37,325 | 57.1% |
+| 2025 | Same name and role family, new CMS label | 18,353 | 28.1% |
+| 2025 | Name already listed at the facility, additional role family | 9,649 | 14.8% |
+| 2026 | Category added by the 2023 disclosure rule, name already listed at the facility | 60,701 | 42.2% |
+| 2026 | Category added by the 2023 disclosure rule, new name | 35,666 | 24.8% |
+| 2026 | New name at the facility | 34,714 | 24.1% |
+| 2026 | Name already listed at the facility, additional role family | 7,955 | 5.5% |
+| 2026 | Same name and role family, new CMS label | 4,954 | 3.4% |
+
 ## Files
 
 Every table in this directory is a CSV named for its content; `study.json` records the release, DOI and row counts. Reproduce with `tcr-open-data ownership-study --release releases/v2026.08 --history history --out analysis/ownership/v2026.08`.

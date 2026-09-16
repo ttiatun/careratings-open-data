@@ -24,6 +24,7 @@ Outputs (CSV unless noted):
   carecompare_owner_turnover  Care Compare owner names first seen per year, roles harmonized (history store)
   carecompare_owner_turnover_by_family  the same count per year and role family (history store)
   carecompare_role_labels  every Care Compare role label with its family and the vintages it appears in (history store)
+  carecompare_first_seen_decomposition  the raw count of relationships first seen per year, split into relabels, added categories, extra roles and new names (history store)
   discrepancy_register    seed rows for the discrepancy register, by type
   summary.md              the headline numbers in prose, with the caveats
 """
@@ -275,6 +276,7 @@ def run_study(release_dir: Path, out_dir: Path, history_dir: Path | None = None,
         LEFT JOIN (SELECT state, SUM(CASE WHEN chow_count_36mo >= 1 THEN 1 ELSE 0 END) AS facilities_with_chow_36mo FROM facilities GROUP BY state) f USING (state)
         WHERE s.state <> 'US' ORDER BY chow_12mo_per_100_facilities DESC NULLS LAST""")
 
+    decomposition_rows: list[tuple] = []
     if ctx["has_history"]:
         emit("ownership_change_trend", """
             SELECT snapshot_date, processing_date AS cms_vintage, COUNT(*) AS facilities,
@@ -310,6 +312,27 @@ def run_study(release_dir: Path, out_dir: Path, history_dir: Path | None = None,
                 SELECT year(first_seen) AS year, role_family, COUNT(*) AS owner_names_first_seen
                 FROM first_rows, bounds WHERE first_seen > first_snapshot
                 GROUP BY 1, 2 ORDER BY 1, 3 DESC""")
+            # The raw count keyed on the printed label, accounted for row by row, so a
+            # reader can see exactly why 2024 and 2026 look like waves of new owners.
+            decomposition_rows = emit("carecompare_first_seen_decomposition", f"""
+                WITH bounds AS (SELECT MIN(first_seen_snapshot) AS first_snapshot FROM ownership_history),
+                rows AS (SELECT ccn, owner_name, first_seen_snapshot, {ROLE_FAMILY_SQL} AS role_family, {COMPARABLE_ROLE_SQL} AS comparable FROM ownership_history),
+                fam AS (SELECT ccn, owner_name, role_family, MIN(first_seen_snapshot) AS family_first FROM rows GROUP BY 1, 2, 3),
+                nm AS (SELECT ccn, owner_name, MIN(first_seen_snapshot) AS name_first FROM rows WHERE comparable GROUP BY 1, 2),
+                classified AS (
+                    SELECT r.*, r.first_seen_snapshot > f.family_first AS prior_same_family,
+                           r.first_seen_snapshot > COALESCE(n.name_first, r.first_seen_snapshot) AS prior_any_comparable
+                    FROM rows r JOIN fam f USING (ccn, owner_name, role_family) LEFT JOIN nm n USING (ccn, owner_name), bounds
+                    WHERE r.first_seen_snapshot > bounds.first_snapshot)
+                SELECT year(first_seen_snapshot) AS year,
+                       CASE WHEN NOT comparable AND prior_any_comparable THEN 'Category added by the 2023 disclosure rule, name already listed at the facility'
+                            WHEN NOT comparable THEN 'Category added by the 2023 disclosure rule, new name'
+                            WHEN prior_same_family THEN 'Same name and role family, new CMS label'
+                            WHEN prior_any_comparable THEN 'Name already listed at the facility, additional role family'
+                            ELSE 'New name at the facility' END AS component,
+                       COUNT(*) AS relationships,
+                       ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (PARTITION BY year(first_seen_snapshot)), 1) AS share_of_year_pct
+                FROM classified GROUP BY 1, 2 ORDER BY 1, 3 DESC""")
             emit("carecompare_role_labels", f"""
                 SELECT role AS cms_role_label, {ROLE_FAMILY_SQL} AS role_family,
                        {COMPARABLE_ROLE_SQL} AS comparable_since_2019,
@@ -337,7 +360,7 @@ def run_study(release_dir: Path, out_dir: Path, history_dir: Path | None = None,
         FROM facilities f WHERE f.ownership_changed_12mo AND COALESCE(f.chow_count_36mo, 0) = 0
         ORDER BY 1, 4, 2""")
 
-    summary = _summary(release, manifest, national[0] if national else None, con, discrepancies, ctx["has_history"])
+    summary = _summary(release, manifest, national[0] if national else None, con, discrepancies, ctx["has_history"], decomposition_rows)
     (out_dir / "summary.md").write_text(summary, encoding="utf-8")
     meta = {"release": release, "built_at": datetime.now(timezone.utc).isoformat(), "builder": {"name": "tcr-open-data", "version": __version__},
             "processing_date": manifest.get("processing_date"), "doi": manifest.get("doi"), "history_store": ctx["has_history"], "tables": results}
@@ -346,7 +369,8 @@ def run_study(release_dir: Path, out_dir: Path, history_dir: Path | None = None,
     return meta
 
 
-def _summary(release: str, manifest: dict, national: tuple | None, con: duckdb.DuckDBPyConnection, discrepancies: list[tuple], has_history: bool) -> str:
+def _summary(release: str, manifest: dict, national: tuple | None, con: duckdb.DuckDBPyConnection, discrepancies: list[tuple], has_history: bool,
+             decomposition: list[tuple] | None = None) -> str:
     n = dict(zip([
         "release", "facilities", "certified_beds", "facilities_with_pecos_enrollment", "pe_owner_facilities", "pe_owner_pct", "pe_owner_beds",
         "reit_owner_facilities", "reit_owner_pct", "pe_party_facilities", "pe_party_pct", "reit_party_facilities", "reit_party_pct", "reit_party_beds",
@@ -413,5 +437,12 @@ def _summary(release: str, manifest: dict, national: tuple | None, con: duckdb.D
             "and after 2025 are not comparable and no report should describe the rise as turnover. The PECOS change-of-ownership file "
             "(`chow_by_year.csv`) is the measure of facilities changing hands.",
         ]
+        decomposition = [row for row in (decomposition or []) if int(row[0]) >= 2024]
+        if decomposition:
+            lines += ["", "### Where the raw counts come from", "",
+                      "Counted on the label CMS printed, the relationships first seen per year look like this (`carecompare_first_seen_decomposition.csv`). "
+                      "Only *New name at the facility* is a candidate for a new owner relationship, and even that row carries the 2025 disclosure wave.", "",
+                      "| Year | Component | Relationships | Share of year |", "| --- | --- | ---: | ---: |"]
+            lines += [f"| {y} | {c} | {int(r):,} | {s}% |" for y, c, r, s in decomposition]
     lines += ["", "## Files", "", "Every table in this directory is a CSV named for its content; `study.json` records the release, DOI and row counts. Reproduce with `tcr-open-data ownership-study --release releases/" + release + " --history history --out analysis/ownership/" + release + "`.", ""]
     return "\n".join(lines)

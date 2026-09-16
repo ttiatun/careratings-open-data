@@ -74,6 +74,9 @@ def test_study_uses_the_history_store_when_present(release, two_snapshots, tmp_p
     assert turnover and set(turnover[0]) == {"year", "owner_names_first_seen", "organizations", "individuals", "facilities_with_a_new_name", "note"}
     by_family = _read(tmp_path / "study" / "carecompare_owner_turnover_by_family.csv")
     assert sum(int(r["owner_names_first_seen"]) for r in by_family) == sum(int(r["owner_names_first_seen"]) for r in turnover), "a name counts once per family it first appears in"
+    decomposition = _read(tmp_path / "study" / "carecompare_first_seen_decomposition.csv")
+    assert all(r["component"] in {"Category added by the 2023 disclosure rule, name already listed at the facility", "Category added by the 2023 disclosure rule, new name",
+                                   "Same name and role family, new CMS label", "Name already listed at the facility, additional role family", "New name at the facility"} for r in decomposition)
     labels = _read(tmp_path / "study" / "carecompare_role_labels.csv")
     assert labels and all(r["comparable_since_2019"] in {"true", "false", "True", "False"} for r in labels)
     assert "Care Compare renamed its role labels" in (tmp_path / "study" / "summary.md").read_text(encoding="utf-8")
