@@ -1,0 +1,45 @@
+name: Data correction
+description: Report a value in a published release that does not match the CMS source
+title: "[correction] "
+labels: ["data-correction"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Every report is checked against the raw CMS files kept with the release. Confirmed corrections are recorded in the public corrections log at https://thecareratings.com/data/corrections/.
+        If the value is wrong at CMS itself, the correction belongs with CMS; tell us anyway and we will note it.
+  - type: input
+    id: release
+    attributes:
+      label: Release
+      placeholder: v2026.08
+    validations:
+      required: true
+  - type: input
+    id: location
+    attributes:
+      label: Table and column
+      placeholder: facilities.has_private_equity_owner
+    validations:
+      required: true
+  - type: input
+    id: key
+    attributes:
+      label: Row (CCN, state, or chain id)
+      placeholder: "015009"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What the value is, and what it should be
+      description: Quote the value in the release and the value in the CMS file, with the file name and vintage (they are listed on the release page and in manifest.json).
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: A link to the CMS file or page, or the relevant row pasted in.
+    validations:
+      required: true

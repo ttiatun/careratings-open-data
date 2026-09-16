@@ -2,6 +2,8 @@
 
 Monthly, versioned, facility-level releases of U.S. nursing home data, built by this repository from public files of the Centers for Medicare & Medicaid Services (CMS). Anyone can rebuild a release from the same CMS files and get the same bytes.
 
+![How a release is built and published: CMS public files go through the tcr-open-data build into the research store, which is read by the website, Zenodo and anyone.](docs/images/pipeline.svg)
+
 Each release contains eight tables as CSV and Parquet:
 
 | Table | Rows (v2026.08) | What it is |
@@ -49,6 +51,16 @@ Validation reconciles the release with the national row of the CMS chain file (f
 Releases are published to a dedicated Cloudflare R2 bucket through the S3 API. Configure `TCR_R2_ACCOUNT_ID`, `TCR_R2_ACCESS_KEY_ID`, `TCR_R2_SECRET_ACCESS_KEY` and optionally `TCR_R2_BUCKET` (default `careratings-open-data`). The GitHub Actions workflow `build-release.yml` runs the build monthly and publishes when those secrets are configured.
 
 The bucket is read through the custom domain `data.thecareratings.com` with a GET/HEAD-only CORS policy (`infra/r2-cors.json`, applied with `tcr-open-data cors --live`); release and raw objects are uploaded as immutable, manifests revalidate every five minutes (`tcr-open-data headers --live` rewrites those headers on objects already stored). Each release is archived at Zenodo for a DOI (`tcr-open-data doi`). Step by step: [docs/publishing.md](docs/publishing.md).
+
+## What the history store shows
+
+Three figures drawn from the history tables (regenerate with `python scripts/readme_charts.py`, which reads the public store):
+
+![Certified nursing homes in the United States, monthly, from the CMS Provider Information file: one point per archived monthly snapshot from January 2019 to August 2026.](docs/images/certified-nursing-homes.svg)
+
+![Special Focus Facilities and SFF candidates flagged in each monthly snapshot; the candidate flag exists from the October 2020 file format on.](docs/images/sff-status.svg)
+
+![What the research store covers: 89 monthly CMS snapshots from 2019 to 2026, 99 Special Focus Facility PDF editions from 2012 to 2024, and release v2026.08 with its DOI.](docs/images/history-coverage.svg)
 
 ## History store
 

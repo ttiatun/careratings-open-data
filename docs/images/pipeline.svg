@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="330" viewBox="0 0 880 330" role="img" aria-labelledby="t d" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <title id="t">How a release is built and published</title>
+  <desc id="d">CMS public files are downloaded, built into a validated release by tcr-open-data, published to the research store, and read by the website, by Zenodo and by anyone.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#898781"/>
+    </marker>
+  </defs>
+  <rect x="0.5" y="0.5" width="879" height="329" rx="10" fill="#fcfcfb" stroke="#e6e5e1"/>
+  <text x="24" y="34" font-size="17" font-weight="700" fill="#0b0b0b">How a release is built and published</text>
+  <text x="24" y="54" font-size="12.5" fill="#52514e">Public files in, a checksummed release out; the data never passes through the website's database.</text>
+
+  <!-- CMS -->
+  <rect x="24" y="96" width="196" height="150" rx="8" fill="#ffffff" stroke="#cfcdc7"/>
+  <text x="122" y="122" font-size="13" font-weight="700" fill="#0b0b0b" text-anchor="middle">CMS public files</text>
+  <text x="122" y="144" font-size="11.5" fill="#52514e" text-anchor="middle">Care Compare provider information,</text>
+  <text x="122" y="160" font-size="11.5" fill="#52514e" text-anchor="middle">penalties, ownership</text>
+  <text x="122" y="180" font-size="11.5" fill="#52514e" text-anchor="middle">PECOS enrollments, owners,</text>
+  <text x="122" y="196" font-size="11.5" fill="#52514e" text-anchor="middle">changes of ownership</text>
+  <text x="122" y="216" font-size="11.5" fill="#52514e" text-anchor="middle">Chain performance measures</text>
+  <text x="122" y="236" font-size="10.5" fill="#898781" text-anchor="middle">plus the monthly archive since 2019</text>
+
+  <line x1="220" y1="171" x2="262" y2="171" stroke="#898781" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- build -->
+  <rect x="264" y="96" width="196" height="150" rx="8" fill="#eaf2fc" stroke="#2a78d6"/>
+  <text x="362" y="122" font-size="13" font-weight="700" fill="#0b0b0b" text-anchor="middle">tcr-open-data build</text>
+  <text x="362" y="144" font-size="11.5" fill="#52514e" text-anchor="middle">header guards, typing by rule,</text>
+  <text x="362" y="160" font-size="11.5" fill="#52514e" text-anchor="middle">documented derived columns</text>
+  <text x="362" y="180" font-size="11.5" fill="#52514e" text-anchor="middle">validation against CMS totals</text>
+  <text x="362" y="196" font-size="11.5" fill="#52514e" text-anchor="middle">SHA-256 manifest, codebook,</text>
+  <text x="362" y="212" font-size="11.5" fill="#52514e" text-anchor="middle">methodology, license notice</text>
+  <text x="362" y="236" font-size="10.5" fill="#898781" text-anchor="middle">this repository, monthly on GitHub Actions</text>
+
+  <line x1="460" y1="171" x2="502" y2="171" stroke="#898781" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- store -->
+  <rect x="504" y="96" width="196" height="150" rx="8" fill="#ffffff" stroke="#cfcdc7"/>
+  <text x="602" y="122" font-size="13" font-weight="700" fill="#0b0b0b" text-anchor="middle">Research store</text>
+  <text x="602" y="144" font-size="11.5" fill="#52514e" text-anchor="middle">data.thecareratings.com</text>
+  <text x="602" y="166" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#52514e" text-anchor="middle">raw/&lt;release&gt;/</text>
+  <text x="602" y="182" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#52514e" text-anchor="middle">releases/&lt;release&gt;/</text>
+  <text x="602" y="198" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#52514e" text-anchor="middle">history/</text>
+  <text x="602" y="214" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#52514e" text-anchor="middle">manifest.json</text>
+  <text x="602" y="236" font-size="10.5" fill="#898781" text-anchor="middle">immutable objects, read-only CORS</text>
+
+  <!-- readers -->
+  <line x1="700" y1="150" x2="742" y2="128" stroke="#898781" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="700" y1="171" x2="742" y2="171" stroke="#898781" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="700" y1="192" x2="742" y2="214" stroke="#898781" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="744" y="108" width="112" height="38" rx="6" fill="#ffffff" stroke="#cfcdc7"/>
+  <text x="800" y="126" font-size="11.5" font-weight="600" fill="#0b0b0b" text-anchor="middle">thecareratings.com</text>
+  <text x="800" y="140" font-size="10.5" fill="#52514e" text-anchor="middle">/data/ pages</text>
+  <rect x="744" y="152" width="112" height="38" rx="6" fill="#ffffff" stroke="#cfcdc7"/>
+  <text x="800" y="170" font-size="11.5" font-weight="600" fill="#0b0b0b" text-anchor="middle">Zenodo</text>
+  <text x="800" y="184" font-size="10.5" fill="#52514e" text-anchor="middle">DOI per release</text>
+  <rect x="744" y="196" width="112" height="38" rx="6" fill="#ffffff" stroke="#cfcdc7"/>
+  <text x="800" y="214" font-size="11.5" font-weight="600" fill="#0b0b0b" text-anchor="middle">Anyone</text>
+  <text x="800" y="228" font-size="10.5" fill="#52514e" text-anchor="middle">CSV, Parquet, DuckDB</text>
+
+  <!-- footer -->
+  <text x="24" y="284" font-size="11.5" fill="#52514e">Licensing by layer: CMS values public domain · derived columns and documentation CC BY 4.0 · identifier crosswalk CC0 · code MIT.</text>
+  <text x="24" y="304" font-size="11.5" fill="#52514e">Every release names its exact CMS source files, their vintages and their checksums, so anyone can rebuild it and get the same bytes.</text>
+</svg>
