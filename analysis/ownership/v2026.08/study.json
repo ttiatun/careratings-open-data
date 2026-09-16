@@ -1,0 +1,222 @@
+{
+  "release": "v2026.08",
+  "built_at": "2026-09-16T05:47:36.217642+00:00",
+  "builder": {
+    "name": "tcr-open-data",
+    "version": "0.1.0"
+  },
+  "processing_date": "2026-08-01",
+  "doi": "10.5281/zenodo.22780105",
+  "history_store": true,
+  "tables": {
+    "national_summary": {
+      "rows": 1,
+      "columns": [
+        "release",
+        "facilities",
+        "certified_beds",
+        "facilities_with_pecos_enrollment",
+        "pe_owner_facilities",
+        "pe_owner_pct",
+        "pe_owner_beds",
+        "reit_owner_facilities",
+        "reit_owner_pct",
+        "pe_party_facilities",
+        "pe_party_pct",
+        "reit_party_facilities",
+        "reit_party_pct",
+        "reit_party_beds",
+        "for_profit_pct",
+        "chain_pct",
+        "facilities_with_chow_36mo",
+        "facilities_with_2plus_chow_36mo",
+        "facilities_ownership_changed_12mo"
+      ]
+    },
+    "by_state": {
+      "rows": 53,
+      "columns": [
+        "state",
+        "facilities",
+        "certified_beds",
+        "pe_owner_facilities",
+        "pe_owner_pct",
+        "reit_owner_facilities",
+        "pe_party_facilities",
+        "reit_party_facilities",
+        "reit_party_pct",
+        "for_profit_pct",
+        "chain_pct",
+        "facilities_with_chow_36mo",
+        "pct_with_chow_36mo",
+        "avg_overall_rating",
+        "avg_overall_rating_pe_owner",
+        "avg_overall_rating_others"
+      ]
+    },
+    "owner_vs_party": {
+      "rows": 2,
+      "columns": [
+        "flag",
+        "owner_role_facilities",
+        "party_only_facilities",
+        "any_role_facilities",
+        "owner_role_pct",
+        "any_role_pct"
+      ]
+    },
+    "quality_by_disclosure": {
+      "rows": 5,
+      "columns": [
+        "disclosure_group",
+        "facilities",
+        "certified_beds",
+        "avg_overall_rating",
+        "pct_rated_1_or_2_stars",
+        "pct_rated_4_or_5_stars",
+        "avg_staffing_rating",
+        "avg_reported_total_nurse_hprd",
+        "avg_reported_rn_hprd",
+        "avg_total_nurse_turnover_pct",
+        "pct_with_any_penalty",
+        "avg_fines_dollars",
+        "pct_sff_or_candidate",
+        "pct_abuse_icon",
+        "pct_for_profit",
+        "pct_in_chain"
+      ]
+    },
+    "quality_by_disclosure_for_profit": {
+      "rows": 5,
+      "columns": [
+        "disclosure_group",
+        "facilities",
+        "certified_beds",
+        "avg_overall_rating",
+        "pct_rated_1_or_2_stars",
+        "pct_rated_4_or_5_stars",
+        "avg_staffing_rating",
+        "avg_reported_total_nurse_hprd",
+        "avg_reported_rn_hprd",
+        "avg_total_nurse_turnover_pct",
+        "pct_with_any_penalty",
+        "avg_fines_dollars",
+        "pct_sff_or_candidate",
+        "pct_abuse_icon",
+        "pct_for_profit",
+        "pct_in_chain"
+      ]
+    },
+    "top_private_equity_owners": {
+      "rows": 25,
+      "columns": [
+        "owner",
+        "facilities",
+        "states",
+        "state_list",
+        "avg_overall_rating",
+        "roles"
+      ]
+    },
+    "top_reit_parties": {
+      "rows": 25,
+      "columns": [
+        "organization",
+        "facilities",
+        "states",
+        "owner_role_rows",
+        "other_party_rows",
+        "roles"
+      ]
+    },
+    "chains_with_disclosures": {
+      "rows": 50,
+      "columns": [
+        "chain_id",
+        "chain_name",
+        "chain_facilities_cms",
+        "state_count",
+        "avg_overall_rating",
+        "avg_staffing_rating",
+        "sff_count",
+        "sff_candidate_count",
+        "abuse_icon_count",
+        "total_fines_dollars",
+        "facilities_in_release",
+        "pe_owner_facilities",
+        "reit_owner_facilities",
+        "reit_party_facilities",
+        "facilities_with_chow_36mo"
+      ]
+    },
+    "chow_by_year": {
+      "rows": 12,
+      "columns": [
+        "year",
+        "chow_type_text",
+        "changes_of_ownership",
+        "facilities"
+      ]
+    },
+    "chow_by_state": {
+      "rows": 53,
+      "columns": [
+        "state",
+        "facility_count",
+        "chow_count_12mo",
+        "chow_12mo_per_100_facilities",
+        "facilities_with_chow_36mo"
+      ]
+    },
+    "ownership_change_trend": {
+      "rows": 89,
+      "columns": [
+        "snapshot_date",
+        "cms_vintage",
+        "facilities",
+        "facilities_ownership_changed_12mo",
+        "pct_ownership_changed_12mo"
+      ]
+    },
+    "carecompare_owner_turnover": {
+      "rows": 8,
+      "columns": [
+        "year",
+        "owner_names_first_seen",
+        "organizations",
+        "individuals",
+        "facilities_with_a_new_name",
+        "note"
+      ]
+    },
+    "carecompare_owner_turnover_by_family": {
+      "rows": 72,
+      "columns": [
+        "year",
+        "role_family",
+        "owner_names_first_seen"
+      ]
+    },
+    "carecompare_role_labels": {
+      "rows": 21,
+      "columns": [
+        "cms_role_label",
+        "role_family",
+        "comparable_since_2019",
+        "first_vintage",
+        "last_vintage",
+        "relationships"
+      ]
+    },
+    "discrepancy_register": {
+      "rows": 479,
+      "columns": [
+        "issue",
+        "ccn",
+        "provider_name",
+        "state",
+        "detail"
+      ]
+    }
+  }
+}

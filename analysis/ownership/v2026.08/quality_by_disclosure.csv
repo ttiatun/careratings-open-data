@@ -1,0 +1,6 @@
+disclosure_group,facilities,certified_beds,avg_overall_rating,pct_rated_1_or_2_stars,pct_rated_4_or_5_stars,avg_staffing_rating,avg_reported_total_nurse_hprd,avg_reported_rn_hprd,avg_total_nurse_turnover_pct,pct_with_any_penalty,avg_fines_dollars,pct_sff_or_candidate,pct_abuse_icon,pct_for_profit,pct_in_chain
+No PE or REIT disclosure,13552,1453898,2.99,40.7,39.9,2.92,3.86,0.68,45.9,46.1,30872.0,3.49,9.48,74.2,69.3
+PE or REIT among other disclosable parties only,529,57368,2.74,49.4,34.6,2.48,3.56,0.57,47.7,53.9,39569.0,3.78,13.61,86.2,92.8
+No PECOS enrollment matched,475,42915,3.07,38.6,40.3,3.3,4.23,0.85,40.8,37.7,25552.0,4.63,11.16,49.1,23.2
+Discloses a REIT owner,69,5919,3.22,32.4,42.6,3.07,3.94,0.82,46.6,42.0,27750.0,2.9,4.35,94.2,92.8
+Discloses a private-equity owner,65,7404,2.3,66.7,17.5,2.83,3.84,0.72,48.8,63.1,52110.0,12.31,20.0,100.0,83.1

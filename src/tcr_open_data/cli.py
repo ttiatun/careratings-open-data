@@ -14,6 +14,7 @@ Command line: download, build, validate, publish, or run the whole release.
     tcr-open-data headers [--prefix releases/] [--live]      # rewrite Content-Type / Cache-Control on stored objects
     tcr-open-data cors [--live]                             # apply infra/r2-cors.json (GET/HEAD only)
     tcr-open-data doi --release releases/v2026.08 [--sandbox] [--publish] [--concept-record-id N]
+    tcr-open-data ownership-study --release releases/v2026.08 [--history history] --out analysis/ownership/v2026.08
 """
 
 from __future__ import annotations
@@ -29,6 +30,7 @@ from .codebook import render_codebook
 from .download import download_all, load_sources_json
 from .history import backfill, consolidate, list_snapshots, reharmonize
 from .manifest import write_release_manifest
+from .ownership_study import run_study
 from .sff import Capture, build_sff_history, fetch_capture, list_captures
 from .storage import R2Config, publish, publish_history, put_cors, retag_objects
 from .validate import validate_release
@@ -197,6 +199,13 @@ def cmd_doi(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_ownership_study(args: argparse.Namespace) -> int:
+    history = Path(args.history) if args.history and Path(args.history).exists() else None
+    meta = run_study(Path(args.release), Path(args.out), history_dir=history, top_n=args.top)
+    print(json.dumps({"release": meta["release"], "history_store": meta["history_store"], "tables": {k: v.get("rows") for k, v in meta["tables"].items()}}, indent=2))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="tcr-open-data", description="Build The Care Ratings open nursing-home data releases from CMS files.")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -285,6 +294,13 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--publish", action="store_true", help="Publish the deposition (irreversible)")
     p.add_argument("--concept-record-id", type=int, default=None, help="Record id of the existing Zenodo record to version (later releases)")
     p.set_defaults(func=cmd_doi)
+
+    p = sub.add_parser("ownership-study", help="Write the descriptive tables behind the ownership study from a release (and the history store if present)")
+    p.add_argument("--release", required=True, help="Release directory, e.g. releases/v2026.08")
+    p.add_argument("--history", default="history", help="History store directory (optional)")
+    p.add_argument("--out", required=True, help="Output directory for the CSV tables and summary.md")
+    p.add_argument("--top", type=int, default=25, help="Rows in the top-N tables")
+    p.set_defaults(func=cmd_ownership_study)
 
     args = parser.parse_args(argv)
     return args.func(args)

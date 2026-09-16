@@ -14,6 +14,11 @@ First release built by `tcr-open-data` 0.1.0. Archived at Zenodo: DOI 10.5281/ze
 
 - Initial build pipeline: exact header guards for every CMS file, DuckDB projections, schema-driven typing, validation against the national row of the CMS chain file, manifests with SHA-256 checksums, generated codebook, and R2 publishing.
 
+## Ownership study tables (September 16, 2026)
+
+- `tcr-open-data ownership-study`: the descriptive tables behind the ownership report from a release and the history store, committed under `analysis/ownership/<release>/` with `summary.md` and `study.json`.
+- Care Compare role labels are mapped to role families (`ROLE_FAMILIES`) so the three CMS relabels (2024-12, 2025-06, 2026-05) and the 2026-only disclosure categories do not count as owner turnover; `carecompare_role_labels.csv` documents every label and its vintages.
+
 ## History store (built September 15, 2026)
 
 - `tcr-open-data backfill`: monthly Provider Information, Penalties and Ownership snapshots from the CMS archive (January 2019 onward) as raw and harmonized Parquet, stacked into `facilities_history`, `penalties_history`, `ownership_history`, with a coverage table (including each snapshot's CMS vintage) and a manifest. Resumable; records failed snapshots instead of stopping; `--retry-failed` reprocesses them.

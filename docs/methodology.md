@@ -133,11 +133,23 @@ A snapshot is the archive date; `processing_date` inside the file is the CMS vin
 
 - `facilities_history.parquet`: one row per facility per snapshot (`snapshot_date`, `header_era`, then the canonical columns).
 - `penalties_history.parquet`: one row per distinct penalty (`ccn`, `penalty_date`, `penalty_type`, `fine_amount`, denial start and length) with `first_seen_snapshot`, `last_seen_snapshot`, `snapshots_seen` and the `fine_id` where CMS published one. Because each monthly file covers a three-year lookback, the union reaches back to penalties imposed in 2016, and a penalty CMS later removed still appears with its last seen date.
-- `ownership_history.parquet`: one row per distinct Care Compare owner relationship (`ccn`, `role`, `owner_type`, `owner_name`) with first and last seen snapshots and the latest percentage and association text.
+- `ownership_history.parquet`: one row per distinct Care Compare owner relationship (`ccn`, `role`, `owner_type`, `owner_name`) with first and last seen snapshots and the latest percentage and association text. The `role` text is the label CMS printed, which changed over time (see *Care Compare role labels* below).
 - `coverage.csv` / `coverage.parquet`: snapshot × table presence, row counts, header era, vintage, and unmapped columns.
 - `history/manifest.json`: build metadata, file checksums, and any missing files or failed snapshots.
 
 Encoding normalization and type casting follow sections 3 and 4. Numeric CCNs shorter than six characters are left-padded.
+
+### Care Compare role labels
+
+The Ownership file renamed its role labels three times, and a relationship keyed on the printed label therefore ends and a new one begins at each rename. The renames, by the first CMS vintage that carries the new label:
+
+| Vintage | Change |
+| --- | --- |
+| 2024-12 | `DIRECTOR` became `CORPORATE DIRECTOR`; `OFFICER` became `CORPORATE OFFICER` |
+| 2025-06 | `MANAGING EMPLOYEE` split into `W-2 MANAGING EMPLOYEE` and `CONTRACTED MANAGING EMPLOYEE`; `PARTNERSHIP INTEREST` split into `GENERAL` and `LIMITED PARTNERSHIP INTEREST` |
+| 2026-05 | `DIRECT` and `INDIRECT OWNERSHIP INTEREST` appear beside the `5% OR GREATER` labels, and the 2023 SNF ownership rule adds categories that did not exist before: `ADP OF THE SNF`, `INDIVIDUAL IS AN OWNER, PARTNER OR TRUSTEE OF ANY ADP OF THE SNF`, `TRUSTEE OF THE SNF`, `MANAGING CONTROL - GOVERNING BODY` |
+
+Any count of relationships over time has to work on role *families* (`ROLE_FAMILIES` in `ownership_study.py`: direct ownership, indirect ownership, partnership, operational/managerial control, corporate director, corporate officer, managing employee, security interest, mortgage interest) and leave out the 2026-only categories. Even then the series breaks in the 2025-11 and 2026-02 vintages, when the fuller disclosures filed on the revised Form CMS-855A reach Care Compare: names first seen in the operational/managerial control family are seven times the earlier annual level. That is a reporting change, not turnover; the PECOS Change of Ownership file is the measure of facilities changing hands.
 
 ## 10. Special Focus Facility history
 
@@ -151,3 +163,13 @@ CMS publishes the SFF list as a PDF that it overwrites in place, at `cms.gov/Med
 - Rows without a printed CCN are matched to `facilities_history` (2019 onward) by normalized name, state and ZIP; then by state and ZIP when only one facility ever had that ZIP; then, among the facilities in that state and ZIP, by the clearly most similar name (Jaccard overlap of distinctive name words of at least 0.5 with no tie). `ccn_match` records `printed`, `name_state_zip`, `state_zip_unique`, `state_zip_name_similar` or `unmatched`. Facilities that closed before 2019 stay unmatched, so the match rate is lowest for the 2012 to 2016 editions.
 - Three captures (June 2023, February 2024, December 2024) are exactly 1 MiB in the archive: the crawler cut them off. They are kept with a `.truncated` marker in the raw cache and flagged `truncated` in `sff_editions`; two still parse because their table pages precede the cut, and the December 2024 one is unreadable.
 - CMS stopped updating this PDF after the April 24, 2024 edition; later captures carry the same content. Monthly SFF and candidate status from January 2019 onward is available regardless in `facilities_history.special_focus_status`.
+
+## 11. Ownership study tables
+
+`tcr-open-data ownership-study --release releases/<release> --history history --out analysis/ownership/<release>` (`ownership_study.py`) writes the descriptive tables behind the ownership report as CSV, with `summary.md` (the headline numbers in prose, with the caveats) and `study.json` (release, DOI, row counts). Everything is computed with DuckDB from the release tables and, when a history store is present, from `facilities_history` and `ownership_history`; every table names the release it came from, and the tables under `analysis/` in this repository are committed so a reader can check a report against them without rebuilding.
+
+- The framing is *as disclosed to CMS*: the private-equity and REIT flags are the facility's own answers on Form CMS-855A, and the disclosure groups are *discloses a private-equity owner*, *discloses a REIT owner*, *PE or REIT among other disclosable parties only*, *no PECOS enrollment matched* and *no PE or REIT disclosure*. Owner roles follow section 5 (ownership and control role codes); `owner_vs_party.csv` shows how the headline changes when landlords, lenders and vendors count.
+- Quality and enforcement comparisons (`quality_by_disclosure.csv`, and the same within for-profit facilities) are descriptive averages of the release columns. They do not control for case mix, size, region or the reasons a facility changes hands, and the report must say so.
+- Top-owner tables count facilities per organization name as printed in the PECOS All Owners file. CMS leaves the organization name blank on some rows; those are grouped as *Name not published in the CMS file*.
+- `discrepancy_register.csv` seeds the public discrepancy register with facilities whose CMS files disagree with each other: no PECOS enrollment matched to the CCN, a PE or REIT owner in PECOS while Care Compare lists only individuals, a chain id missing from the chain file, and a Care Compare ownership-change flag with no PECOS change of ownership in 36 months.
+- The history tables (`ownership_change_trend.csv`, `carecompare_owner_turnover.csv`, `carecompare_owner_turnover_by_family.csv`, `carecompare_role_labels.csv`) follow the role-family rules in section 9.
