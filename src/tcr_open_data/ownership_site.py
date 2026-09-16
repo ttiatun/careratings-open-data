@@ -124,6 +124,66 @@ def _category_counts(discrepancies: list[tuple]) -> list[dict]:
     return [{"issue": issue, "ownership_category": category, "facilities": n} for (issue, category), n in sorted(counts.items())]
 
 
+STATE_NAMES = {
+    "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California", "CO": "Colorado", "CT": "Connecticut", "DE": "Delaware",
+    "DC": "District of Columbia", "FL": "Florida", "GA": "Georgia", "GU": "Guam", "HI": "Hawaii", "ID": "Idaho", "IL": "Illinois", "IN": "Indiana", "IA": "Iowa",
+    "KS": "Kansas", "KY": "Kentucky", "LA": "Louisiana", "ME": "Maine", "MD": "Maryland", "MA": "Massachusetts", "MI": "Michigan", "MN": "Minnesota",
+    "MS": "Mississippi", "MO": "Missouri", "MT": "Montana", "NE": "Nebraska", "NV": "Nevada", "NH": "New Hampshire", "NJ": "New Jersey", "NM": "New Mexico",
+    "NY": "New York", "NC": "North Carolina", "ND": "North Dakota", "OH": "Ohio", "OK": "Oklahoma", "OR": "Oregon", "PA": "Pennsylvania", "PR": "Puerto Rico",
+    "RI": "Rhode Island", "SC": "South Carolina", "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas", "UT": "Utah", "VT": "Vermont", "VA": "Virginia",
+    "VI": "Virgin Islands", "WA": "Washington", "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming",
+}
+
+
+def _rank(states: list[dict], key: str, state: str) -> str:
+    ranked = sorted((s for s in states if not s.get("suppressed") and s.get(key) is not None), key=lambda s: (-(s[key] or 0), s["state"]))
+    for i, s in enumerate(ranked, 1):
+        if s["state"] == state:
+            return f"{i} of {len(ranked)}"
+    return "not ranked"
+
+
+def write_state_cuts(states: list[dict], national: dict | None, out_dir: Path, release: str, processing_date: str | None) -> Path:
+    """One section per state with its figures and its rank among the states with at least SMALL_STATE facilities, for state press."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    n = national or {}
+    lines = [
+        f"# State cuts: nursing home ownership as disclosed to CMS, release {release}",
+        "",
+        f"One section per state from the ownership study (CMS Provider Information vintage {processing_date}; PECOS files as recorded in the release manifest). "
+        "Every figure is a column of `by_state.csv` or the state layers in `site/ownership.json`; ranks are among states with at least "
+        f"{SMALL_STATE} certified nursing homes, highest share first. Ownership figures are as disclosed on Form CMS-855A: a facility that discloses no "
+        "private-equity or REIT owner has not reported one, which is not a finding that it has none. Comparisons are descriptive.",
+        "",
+        "National: "
+        + (f"{n.get('facilities'):,} facilities; {n.get('pe_owner_facilities'):,} ({n.get('pe_owner_pct')}%) disclose a private-equity owner; "
+           f"{n.get('reit_party_facilities'):,} ({n.get('reit_party_pct')}%) disclose a REIT in any role; {n.get('for_profit_pct')}% for-profit; "
+           f"{n.get('chain_pct')}% in a CMS-identified chain; {n.get('facilities_with_chow_36mo'):,} changed hands in 36 months." if n else "see national_summary.csv"),
+        "",
+    ]
+    for s in sorted(states, key=lambda r: STATE_NAMES.get(r["state"], r["state"])):
+        name = STATE_NAMES.get(s["state"], s["state"])
+        lines.append(f"## {name} ({s['state']})")
+        lines.append("")
+        if s.get("suppressed"):
+            lines.append(f"{s['facilities']} certified nursing home(s): fewer than {SMALL_STATE}, so shares are not ranked or mapped.")
+            lines.append("")
+            continue
+        lines += [
+            f"- Certified nursing homes: {s['facilities']:,} ({(s.get('certified_beds') or 0):,} certified beds); average overall rating {s.get('avg_overall_rating')}.",
+            f"- Disclose a private-equity owner: {s['pe_owner_facilities']} ({s.get('pe_owner_pct')}%), rank {_rank(states, 'pe_owner_pct', s['state'])}.",
+            f"- Disclose a REIT in any role: {s['reit_any_facilities']} ({s.get('reit_any_pct')}%), rank {_rank(states, 'reit_any_pct', s['state'])}; as an owner: {s['reit_owner_facilities']}.",
+            f"- For-profit: {s.get('for_profit_pct')}% (rank {_rank(states, 'for_profit_pct', s['state'])}); in a CMS-identified chain: {s.get('chain_pct')}% (rank {_rank(states, 'chain_pct', s['state'])}).",
+            f"- Changed hands in the 36 months before the vintage (PECOS): {s['facilities_with_chow_36mo']} ({s.get('chow_36mo_pct')}%), rank {_rank(states, 'chow_36mo_pct', s['state'])}; Care Compare 12-month change flag: {s['facilities_ownership_changed_12mo']}.",
+            f"- No PECOS enrollment matched (disclosures unreadable): {s['facilities_without_pecos']} ({s.get('without_pecos_pct')}%).",
+            f"- Special Focus Facilities or candidates: {s['sff_or_candidate']}; abuse icons: {s['abuse_icon_facilities']}.",
+            "",
+        ]
+    path = out_dir / "state_cuts.md"
+    path.write_text("\n".join(lines), encoding="utf-8")
+    return path
+
+
 def write_ownership_site(con: duckdb.DuckDBPyConnection, out_dir: Path, tables_dir: Path, manifest: dict, discrepancies: list[tuple]) -> dict:
     """Write `<out_dir>/ownership.json` and `<out_dir>/discrepancy_register.json` from the study tables and the release views."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -163,6 +223,7 @@ def write_ownership_site(con: duckdb.DuckDBPyConnection, out_dir: Path, tables_d
         "discrepancy_by_category": _category_counts(discrepancies),
     }
     (out_dir / "ownership.json").write_text(json.dumps(ownership, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    write_state_cuts(states, ownership["national"], tables_dir / "press", manifest["release"], manifest.get("processing_date"))
 
     known = {i["issue"] for i in DISCREPANCY_ISSUES}
     register = {
