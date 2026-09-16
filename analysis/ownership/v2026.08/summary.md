@@ -70,7 +70,9 @@ CMS leaves the organization name blank on some rows; those are grouped as *Name 
 
 - No PECOS enrollment matched to the CCN: 475 facilities
 - Ownership changed in the last 12 months per Care Compare, no PECOS change of ownership in 36 months: 1 facilities
+- Ownership-interest owners disclosed without any ownership percentage: 293 facilities
 - PE or REIT owner disclosed in PECOS, Care Compare lists individuals only: 3 facilities
+- PECOS enrollment lists no ownership-interest party: 1,437 facilities
 
 ## History store tables
 

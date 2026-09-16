@@ -105,8 +105,11 @@ def plan_analysis_uploads(analysis_dir: Path) -> list[tuple[Path, str]]:
     if analysis_dir.parent.parent.name != "analysis" or not study or not release:
         raise ValueError(f"expected analysis/<study>/<release>, got {analysis_dir}")
     prefix = f"analysis/{study}/{release}/"
-    return [(path, prefix + path.relative_to(analysis_dir).as_posix()) for path in sorted(analysis_dir.rglob("*"))
-            if path.is_file() and path.suffix in (".csv", ".json", ".md", ".parquet")]
+    uploads = [(path, prefix + path.relative_to(analysis_dir).as_posix()) for path in sorted(analysis_dir.rglob("*"))
+               if path.is_file() and path.suffix in (".csv", ".json", ".md", ".parquet")]
+    # Study-level files that are not tied to one release (the state law tracker) sit beside the runs.
+    uploads += [(path, f"analysis/{study}/{path.name}") for path in sorted(analysis_dir.parent.glob("*.json")) if path.name != "latest.json"]
+    return uploads
 
 
 def analysis_pointer(analysis_dir: Path) -> tuple[str, dict]:

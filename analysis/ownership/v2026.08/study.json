@@ -1,6 +1,6 @@
 {
   "release": "v2026.08",
-  "built_at": "2026-09-16T16:41:30.679638+00:00",
+  "built_at": "2026-09-16T17:29:30.105522+00:00",
   "builder": {
     "name": "tcr-open-data",
     "version": "0.1.0"
@@ -218,12 +218,14 @@
       ]
     },
     "discrepancy_register": {
-      "rows": 479,
+      "rows": 2209,
       "columns": [
         "issue",
         "ccn",
         "provider_name",
         "state",
+        "ownership_category",
+        "chain_name",
         "detail"
       ]
     },
@@ -232,6 +234,13 @@
       "columns": [
         "index.json",
         "<chain_id>.json"
+      ]
+    },
+    "site/ownership": {
+      "rows": 53,
+      "columns": [
+        "ownership.json",
+        "discrepancy_register.json"
       ]
     }
   }
