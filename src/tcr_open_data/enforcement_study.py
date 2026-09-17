@@ -46,6 +46,7 @@ import duckdb
 
 from . import __version__
 from .ownership_study import DISCLOSURE_GROUP, _q, _run, _write_csv
+from .study_site import write_study_site
 
 SMALL_STATE = 10
 
@@ -229,6 +230,8 @@ def run_study(release_dir: Path, out_dir: Path, history_dir: Path | None = None,
 
     summary = _summary(release, manifest, con, out_dir, ctx["has_history"])
     (out_dir / "summary.md").write_text(summary, encoding="utf-8")
+    write_study_site("enforcement", out_dir, manifest, list(results), extra={"small_state_threshold": SMALL_STATE, "history_store": ctx["has_history"]})
+    results["site/enforcement"] = {"rows": 1, "columns": ["enforcement.json"]}
     meta = {"study": "enforcement", "release": release, "built_at": datetime.now(timezone.utc).isoformat(), "builder": {"name": "tcr-open-data", "version": __version__},
             "processing_date": manifest.get("processing_date"), "doi": manifest.get("doi"), "history_store": ctx["has_history"], "tables": results}
     (out_dir / "study.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")

@@ -38,6 +38,10 @@ def test_enforcement_tables(release, tmp_path: Path):
     summary = (out / "summary.md").read_text(encoding="utf-8")
     assert summary.startswith(f"# Enforcement study tables, release {release_dir.name}") and "per instance or per day" in summary
     assert "fines_by_penalty_year" not in json.loads((out / "study.json").read_text(encoding="utf-8"))["tables"]
+    site = json.loads((out / "site" / "enforcement.json").read_text(encoding="utf-8"))
+    assert site["study"] == "enforcement" and site["release"] == release_dir.name and site["small_state_threshold"] == 10
+    assert site["tables"]["national_summary"][0]["facilities"] == int(national["facilities"])
+    assert len(site["tables"]["by_state"]) == len(states) and isinstance(site["tables"]["by_state"][0]["suppressed"], bool)
 
 
 def test_enforcement_history_tables(release, two_snapshots, tmp_path: Path):

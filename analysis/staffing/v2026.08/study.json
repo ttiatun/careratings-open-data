@@ -1,7 +1,7 @@
 {
   "study": "staffing",
   "release": "v2026.08",
-  "built_at": "2026-09-17T03:10:33.748529+00:00",
+  "built_at": "2026-09-17T17:48:27.401748+00:00",
   "builder": {
     "name": "tcr-open-data",
     "version": "0.1.0"
@@ -194,6 +194,12 @@
         "avg_total_latest",
         "change_in_pct_all_three",
         "suppressed"
+      ]
+    },
+    "site/staffing": {
+      "rows": 1,
+      "columns": [
+        "staffing.json"
       ]
     }
   }
