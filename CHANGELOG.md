@@ -14,6 +14,12 @@ First release built by `tcr-open-data` 0.1.0. Archived at Zenodo: DOI 10.5281/ze
 
 - Initial build pipeline: exact header guards for every CMS file, DuckDB projections, schema-driven typing, validation against the national row of the CMS chain file, manifests with SHA-256 checksums, generated codebook, and R2 publishing.
 
+## Enforcement study correction and state staffing standards (September 17, 2026)
+
+- **Corrected:** `analysis/enforcement/<release>/fines_in_file_by_snapshot.csv` is now counted from the rows of each monthly Penalties file instead of being reconstructed from first and last seen dates. The earlier table understated recent files by about two percent, overstated some 2021 files, and carried a value for 2026-08-06, a snapshot that has no Penalties file. Latest file: 13,256 fines (was 12,968); peak: 37,082 on 2023-06-27 (was 37,105). A `counted_from` column records the method.
+- New table `file_changes_by_snapshot.csv`: distinct fines each monthly file added and dropped, days since the previous file, and how late the added fines were.
+- New hand-curated table `analysis/staffing/state_standards.json`: the minimum nursing staff each state and the District of Columbia require of nursing homes, with the legal citation, the phrases each figure was checked against and the date of the check. `tcr-open-data verify-standards` validates the file and re-checks every entry against the legal text (`state_standards.py`); methodology section 14.
+
 ## Enforcement and staffing study tables (September 2026)
 
 - `tcr-open-data enforcement-study`: fines and payment denials by state, ownership, disclosure group and chain, fine sizes, concentration of fine dollars, and, from the history store, the reporting lag, the trend at equal maturity, fines present in each monthly file and Special Focus Facility tenure. The Penalties file has no per-instance flag and nothing here infers one.

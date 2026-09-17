@@ -41,7 +41,7 @@ import duckdb
 
 from . import __version__
 from .ownership_study import DISCLOSURE_GROUP, _q, _run, _write_csv
-from .study_site import write_study_site
+from .study_site import write_state_cuts, write_study_site
 
 RN_FLOOR = 0.55
 AIDE_FLOOR = 2.45
@@ -159,6 +159,11 @@ def run_study(release_dir: Path, out_dir: Path, history_dir: Path | None = None)
     write_study_site("staffing", out_dir, manifest, list(results), extra={"small_state_threshold": SMALL_STATE, "history_store": ctx["has_history"],
                                                                        "floors": {"rn": RN_FLOOR, "aide": AIDE_FLOOR, "total": TOTAL_FLOOR}})
     results["site/staffing"] = {"rows": 1, "columns": ["staffing.json"]}
+    # The hand-curated state standards sit beside the study runs (analysis/staffing/state_standards.json); the cuts quote them when present.
+    standards_path = out_dir.parent / "state_standards.json"
+    standards = json.loads(standards_path.read_text(encoding="utf-8")) if standards_path.exists() else None
+    write_state_cuts("staffing", out_dir, manifest, SMALL_STATE, standards=standards)
+    results["press/state_cuts"] = {"rows": 1, "columns": ["state_cuts.md"]}
     meta = {"study": "staffing", "release": release, "built_at": datetime.now(timezone.utc).isoformat(), "builder": {"name": "tcr-open-data", "version": __version__},
             "processing_date": manifest.get("processing_date"), "doi": manifest.get("doi"), "history_store": ctx["has_history"],
             "floors": {"rn": RN_FLOOR, "aide": AIDE_FLOOR, "total": TOTAL_FLOOR}, "tables": results}

@@ -29,7 +29,8 @@ Outputs (CSV unless noted):
   fines_by_penalty_year     every fine seen in any snapshot, by penalty year (history store)
   fines_equal_maturity      the same, counted only if visible by August 31 of the next year (history store)
   reporting_lag_by_year     days from penalty date to first appearance in the file (history store)
-  fines_in_file_by_snapshot fines and dollars present in each monthly file (history store)
+  fines_in_file_by_snapshot fine rows and dollars in each monthly Penalties file, counted from the file itself (history store)
+  file_changes_by_snapshot  distinct fines each file added and dropped, and how late the added ones were (history store)
   denials_by_year           payment denials by year (history store)
   sff_monthly               Special Focus Facilities and candidates per snapshot (history store)
   sff_tenure                how long facilities stay in the program and what became of them (history store)
@@ -46,7 +47,7 @@ import duckdb
 
 from . import __version__
 from .ownership_study import DISCLOSURE_GROUP, _q, _run, _write_csv
-from .study_site import write_study_site
+from .study_site import write_state_cuts, write_study_site
 
 SMALL_STATE = 10
 
@@ -82,7 +83,13 @@ def register_views(con: duckdb.DuckDBPyConnection, release_dir: Path, history_di
         con.execute(f"CREATE OR REPLACE VIEW penalties_history AS SELECT * FROM read_parquet('{_q(history_dir / 'penalties_history.parquet')}')")
         con.execute(f"CREATE OR REPLACE VIEW facilities_history AS SELECT * FROM read_parquet('{_q(history_dir / 'facilities_history.parquet')}')")
         has_history = True
-    return {"manifest": manifest, "has_history": has_history}
+    # The harmonized monthly Penalties files, when the full history store is on disk: the literal rows of each file.
+    has_snapshot_files = False
+    snapshot_dir = history_dir / "harmonized" / "penalties" if history_dir else None
+    if has_history and snapshot_dir and any(snapshot_dir.glob("*.parquet")):
+        con.execute(f"CREATE OR REPLACE VIEW penalties_snapshots AS SELECT * FROM read_parquet('{_q(snapshot_dir)}/*.parquet', union_by_name=true)")
+        has_snapshot_files = True
+    return {"manifest": manifest, "has_history": has_history, "has_snapshot_files": has_snapshot_files}
 
 
 def run_study(release_dir: Path, out_dir: Path, history_dir: Path | None = None, top_n: int = 25, min_chain: int = 20) -> dict:
@@ -194,12 +201,38 @@ def run_study(release_dir: Path, out_dir: Path, history_dir: Path | None = None,
                    ROUND(quantile_cont(lag_days, 0.90), 0) AS p90_lag_days
             FROM lagged GROUP BY 1 ORDER BY 1""")
 
-        emit("fines_in_file_by_snapshot", f"""
-            WITH snaps AS (SELECT DISTINCT snapshot_date FROM facilities_history)
-            SELECT s.snapshot_date, COUNT(*) AS fines_in_file, ROUND(SUM(p.fine_amount), 0) AS dollars_in_file,
-                   COUNT(DISTINCT p.ccn) AS facilities_with_a_fine
-            FROM snaps s JOIN penalties_history p ON p.first_seen_snapshot <= s.snapshot_date AND p.last_seen_snapshot >= s.snapshot_date
-            WHERE p.{FINE} GROUP BY 1 ORDER BY 1""")
+        # Snapshots that carried a Penalties file. Some archive snapshots re-publish Provider Information only, so the
+        # dates must come from the penalties side, never from facilities_history.
+        penalty_snaps = ("SELECT DISTINCT CAST(snapshot_date AS DATE) AS snapshot_date FROM penalties_snapshots" if ctx["has_snapshot_files"] else
+                         "SELECT first_seen_snapshot AS snapshot_date FROM penalties_history UNION SELECT last_seen_snapshot FROM penalties_history")
+        if ctx["has_snapshot_files"]:
+            emit("fines_in_file_by_snapshot", f"""
+                SELECT CAST(snapshot_date AS DATE) AS snapshot_date, COUNT(*) AS fines_in_file, ROUND(SUM(fine_amount), 0) AS dollars_in_file,
+                       COUNT(DISTINCT ccn) AS facilities_with_a_fine, 'rows of the monthly file' AS counted_from
+                FROM penalties_snapshots WHERE {FINE} GROUP BY 1 ORDER BY 1""")
+        else:
+            emit("fines_in_file_by_snapshot", f"""
+                WITH snaps AS ({penalty_snaps})
+                SELECT s.snapshot_date, COUNT(*) AS fines_in_file, ROUND(SUM(p.fine_amount), 0) AS dollars_in_file,
+                       COUNT(DISTINCT p.ccn) AS facilities_with_a_fine, 'reconstructed from first and last seen dates' AS counted_from
+                FROM snaps s JOIN penalties_history p ON p.first_seen_snapshot <= s.snapshot_date AND p.last_seen_snapshot >= s.snapshot_date
+                WHERE p.{FINE} GROUP BY 1 ORDER BY 1""")
+
+        emit("file_changes_by_snapshot", f"""
+            WITH snaps AS ({penalty_snaps}),
+            ordered AS (SELECT snapshot_date, LAG(snapshot_date) OVER (ORDER BY snapshot_date) AS prev_snapshot FROM snaps),
+            fines AS (SELECT * FROM penalties_history WHERE {FINE}),
+            added AS (SELECT first_seen_snapshot AS snapshot_date, COUNT(*) AS fines_added, ROUND(MEDIAN(fine_amount), 0) AS median_added_fine_dollars,
+                             ROUND(MEDIAN(date_diff('day', penalty_date, first_seen_snapshot)), 0) AS median_lag_days_of_added,
+                             SUM(CASE WHEN date_diff('day', penalty_date, first_seen_snapshot) > 365 THEN 1 ELSE 0 END) AS added_over_a_year_late
+                      FROM fines GROUP BY 1),
+            dropped AS (SELECT last_seen_snapshot AS prev_snapshot, COUNT(*) AS fines_dropped FROM fines GROUP BY 1)
+            SELECT o.snapshot_date, date_diff('day', o.prev_snapshot, o.snapshot_date) AS days_since_previous_file,
+                   COALESCE(a.fines_added, 0) AS distinct_fines_added, COALESCE(d.fines_dropped, 0) AS distinct_fines_dropped,
+                   a.median_added_fine_dollars, a.median_lag_days_of_added, COALESCE(a.added_over_a_year_late, 0) AS added_over_a_year_late,
+                   CASE WHEN a.fines_added > 0 THEN ROUND(100.0 * a.added_over_a_year_late / a.fines_added, 1) END AS pct_added_over_a_year_late
+            FROM ordered o LEFT JOIN added a ON a.snapshot_date = o.snapshot_date LEFT JOIN dropped d ON d.prev_snapshot = o.prev_snapshot
+            WHERE o.prev_snapshot IS NOT NULL ORDER BY 1""")
 
         emit("denials_by_year", f"""
             SELECT year(penalty_date) AS penalty_year, COUNT(*) AS payment_denials, ROUND(AVG(payment_denial_length_days), 0) AS avg_length_days,
@@ -230,8 +263,10 @@ def run_study(release_dir: Path, out_dir: Path, history_dir: Path | None = None,
 
     summary = _summary(release, manifest, con, out_dir, ctx["has_history"])
     (out_dir / "summary.md").write_text(summary, encoding="utf-8")
-    write_study_site("enforcement", out_dir, manifest, list(results), extra={"small_state_threshold": SMALL_STATE, "history_store": ctx["has_history"]})
+    write_study_site("enforcement", out_dir, manifest, list(results), extra={"small_state_threshold": SMALL_STATE, "history_store": ctx["has_history"], "fines_in_file_counted_from_files": ctx["has_snapshot_files"]})
     results["site/enforcement"] = {"rows": 1, "columns": ["enforcement.json"]}
+    write_state_cuts("enforcement", out_dir, manifest, SMALL_STATE)
+    results["press/state_cuts"] = {"rows": 1, "columns": ["state_cuts.md"]}
     meta = {"study": "enforcement", "release": release, "built_at": datetime.now(timezone.utc).isoformat(), "builder": {"name": "tcr-open-data", "version": __version__},
             "processing_date": manifest.get("processing_date"), "doi": manifest.get("doi"), "history_store": ctx["has_history"], "tables": results}
     (out_dir / "study.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
@@ -304,7 +339,13 @@ def _summary(release: str, manifest: dict, con: duckdb.DuckDBPyConnection, out_d
         if infile:
             peak = max(infile, key=lambda r: r[1])
             lines.append(f"- **Fines in the file.** The monthly file held {int(peak[1]):,} fines ({_money(peak[2])}) at its peak on {peak[0]} and holds {int(infile[-1][1]):,} ({_money(infile[-1][2])}) on {infile[-1][0]} "
-                         "(`fines_in_file_by_snapshot.csv`). The three-year lookback is rolling off the 2021 to 2023 surge.")
+                         "(`fines_in_file_by_snapshot.csv`, counted from the rows of each monthly file). The three-year lookback is rolling off the 2021 to 2023 surge.")
+        changes = _csv(con, out_dir / "file_changes_by_snapshot.csv")[1]
+        if changes:
+            recent = changes[-3:]
+            lines.append("- **What each file added.** " + "; ".join(
+                f"{r[0]}: {int(r[2]):,} distinct fines added, {int(r[3]):,} dropped" + (f", {r[7]}% of those added were first seen more than a year after the penalty date" if r[7] is not None else "")
+                for r in recent) + " (`file_changes_by_snapshot.csv`; a distinct fine is a facility, date and amount, so two equal fines on one day count once).")
         if tenure[1] and tenure[1][0][0]:
             t = {k: (v if v is not None else 0) for k, v in zip(tenure[0], tenure[1][0])}
             lines.append(f"- **Special Focus Facilities.** {int(t['facilities_ever_sff']):,} facilities carried the SFF flag in at least one monthly file; the median was {int(t['median_snapshots_flagged'])} monthly files and "

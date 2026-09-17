@@ -1,7 +1,7 @@
 {
   "study": "staffing",
   "release": "v2026.08",
-  "built_at": "2026-09-17T17:48:27.401748+00:00",
+  "built_at": "2026-09-17T22:53:20.431111+00:00",
   "builder": {
     "name": "tcr-open-data",
     "version": "0.1.0"
@@ -200,6 +200,12 @@
       "rows": 1,
       "columns": [
         "staffing.json"
+      ]
+    },
+    "press/state_cuts": {
+      "rows": 1,
+      "columns": [
+        "state_cuts.md"
       ]
     }
   }

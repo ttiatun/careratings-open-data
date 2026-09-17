@@ -1,7 +1,7 @@
 {
   "study": "enforcement",
   "release": "v2026.08",
-  "built_at": "2026-09-17T17:48:26.827698+00:00",
+  "built_at": "2026-09-17T22:53:21.302946+00:00",
   "builder": {
     "name": "tcr-open-data",
     "version": "0.1.0"
@@ -221,12 +221,26 @@
       ]
     },
     "fines_in_file_by_snapshot": {
-      "rows": 89,
+      "rows": 88,
       "columns": [
         "snapshot_date",
         "fines_in_file",
         "dollars_in_file",
-        "facilities_with_a_fine"
+        "facilities_with_a_fine",
+        "counted_from"
+      ]
+    },
+    "file_changes_by_snapshot": {
+      "rows": 87,
+      "columns": [
+        "snapshot_date",
+        "days_since_previous_file",
+        "distinct_fines_added",
+        "distinct_fines_dropped",
+        "median_added_fine_dollars",
+        "median_lag_days_of_added",
+        "added_over_a_year_late",
+        "pct_added_over_a_year_late"
       ]
     },
     "denials_by_year": {
@@ -266,6 +280,12 @@
       "rows": 1,
       "columns": [
         "enforcement.json"
+      ]
+    },
+    "press/state_cuts": {
+      "rows": 1,
+      "columns": [
+        "state_cuts.md"
       ]
     }
   }
