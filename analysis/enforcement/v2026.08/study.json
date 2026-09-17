@@ -1,0 +1,266 @@
+{
+  "study": "enforcement",
+  "release": "v2026.08",
+  "built_at": "2026-09-17T03:10:33.023856+00:00",
+  "builder": {
+    "name": "tcr-open-data",
+    "version": "0.1.0"
+  },
+  "processing_date": "2026-08-01",
+  "doi": "10.5281/zenodo.22780105",
+  "history_store": true,
+  "tables": {
+    "national_summary": {
+      "rows": 1,
+      "columns": [
+        "release",
+        "facilities",
+        "certified_beds",
+        "facilities_fined",
+        "pct_facilities_fined",
+        "fines",
+        "fines_per_100_facilities",
+        "total_fines_dollars",
+        "fines_dollars_per_facility",
+        "fines_dollars_per_bed",
+        "payment_denials",
+        "denials_per_100_facilities",
+        "pct_with_any_penalty",
+        "sff_or_candidate",
+        "abuse_icon_facilities",
+        "avg_overall_rating",
+        "fine_rows",
+        "median_fine_dollars",
+        "mean_fine_dollars",
+        "earliest_penalty_date",
+        "latest_penalty_date"
+      ]
+    },
+    "fine_size_distribution": {
+      "rows": 6,
+      "columns": [
+        "band_order",
+        "band",
+        "fines",
+        "pct_of_fines",
+        "dollars",
+        "pct_of_dollars"
+      ]
+    },
+    "concentration": {
+      "rows": 5,
+      "columns": [
+        "facility_group",
+        "facilities_in_group",
+        "pct_of_fine_dollars"
+      ]
+    },
+    "by_state": {
+      "rows": 53,
+      "columns": [
+        "state",
+        "facilities",
+        "certified_beds",
+        "facilities_fined",
+        "pct_facilities_fined",
+        "fines",
+        "fines_per_100_facilities",
+        "total_fines_dollars",
+        "fines_dollars_per_facility",
+        "fines_dollars_per_bed",
+        "payment_denials",
+        "denials_per_100_facilities",
+        "pct_with_any_penalty",
+        "sff_or_candidate",
+        "abuse_icon_facilities",
+        "avg_overall_rating",
+        "suppressed"
+      ]
+    },
+    "by_ownership": {
+      "rows": 3,
+      "columns": [
+        "ownership_category",
+        "facilities",
+        "certified_beds",
+        "facilities_fined",
+        "pct_facilities_fined",
+        "fines",
+        "fines_per_100_facilities",
+        "total_fines_dollars",
+        "fines_dollars_per_facility",
+        "fines_dollars_per_bed",
+        "payment_denials",
+        "denials_per_100_facilities",
+        "pct_with_any_penalty",
+        "sff_or_candidate",
+        "abuse_icon_facilities",
+        "avg_overall_rating"
+      ]
+    },
+    "by_disclosure_group": {
+      "rows": 5,
+      "columns": [
+        "disclosure_group",
+        "facilities",
+        "certified_beds",
+        "facilities_fined",
+        "pct_facilities_fined",
+        "fines",
+        "fines_per_100_facilities",
+        "total_fines_dollars",
+        "fines_dollars_per_facility",
+        "fines_dollars_per_bed",
+        "payment_denials",
+        "denials_per_100_facilities",
+        "pct_with_any_penalty",
+        "sff_or_candidate",
+        "abuse_icon_facilities",
+        "avg_overall_rating"
+      ]
+    },
+    "by_chain_status": {
+      "rows": 2,
+      "columns": [
+        "chain_status",
+        "facilities",
+        "certified_beds",
+        "facilities_fined",
+        "pct_facilities_fined",
+        "fines",
+        "fines_per_100_facilities",
+        "total_fines_dollars",
+        "fines_dollars_per_facility",
+        "fines_dollars_per_bed",
+        "payment_denials",
+        "denials_per_100_facilities",
+        "pct_with_any_penalty",
+        "sff_or_candidate",
+        "abuse_icon_facilities",
+        "avg_overall_rating"
+      ]
+    },
+    "top_chains_by_fines_per_facility": {
+      "rows": 25,
+      "columns": [
+        "chain_id",
+        "chain_name",
+        "facilities",
+        "certified_beds",
+        "facilities_fined",
+        "pct_facilities_fined",
+        "fines",
+        "fines_per_100_facilities",
+        "total_fines_dollars",
+        "fines_dollars_per_facility",
+        "fines_dollars_per_bed",
+        "payment_denials",
+        "denials_per_100_facilities",
+        "pct_with_any_penalty",
+        "sff_or_candidate",
+        "abuse_icon_facilities",
+        "avg_overall_rating"
+      ]
+    },
+    "top_facilities_by_fines": {
+      "rows": 25,
+      "columns": [
+        "ccn",
+        "provider_name",
+        "city",
+        "state",
+        "ownership_category",
+        "chain_name",
+        "certified_beds",
+        "overall_rating",
+        "special_focus_status",
+        "abuse_icon",
+        "num_fines",
+        "total_fines_dollars",
+        "num_payment_denials"
+      ]
+    },
+    "same_day_fines": {
+      "rows": 5,
+      "columns": [
+        "fines_on_the_same_day",
+        "facility_dates",
+        "fines",
+        "dollars"
+      ]
+    },
+    "fines_by_penalty_year": {
+      "rows": 11,
+      "columns": [
+        "penalty_year",
+        "fines",
+        "dollars",
+        "median_fine_dollars",
+        "mean_fine_dollars",
+        "note"
+      ]
+    },
+    "fines_equal_maturity": {
+      "rows": 8,
+      "columns": [
+        "penalty_year",
+        "fines_visible_by_aug_31_next_year",
+        "dollars",
+        "median_fine_dollars"
+      ]
+    },
+    "reporting_lag_by_year": {
+      "rows": 8,
+      "columns": [
+        "first_seen_year",
+        "fines_first_seen",
+        "median_lag_days",
+        "p25_lag_days",
+        "p75_lag_days",
+        "p90_lag_days"
+      ]
+    },
+    "fines_in_file_by_snapshot": {
+      "rows": 89,
+      "columns": [
+        "snapshot_date",
+        "fines_in_file",
+        "dollars_in_file",
+        "facilities_with_a_fine"
+      ]
+    },
+    "denials_by_year": {
+      "rows": 11,
+      "columns": [
+        "penalty_year",
+        "payment_denials",
+        "avg_length_days",
+        "median_length_days"
+      ]
+    },
+    "sff_monthly": {
+      "rows": 89,
+      "columns": [
+        "snapshot_date",
+        "facilities",
+        "special_focus_facilities",
+        "sff_candidates"
+      ]
+    },
+    "sff_tenure": {
+      "rows": 1,
+      "columns": [
+        "facilities_ever_sff",
+        "median_snapshots_flagged",
+        "p90_snapshots_flagged",
+        "max_snapshots_flagged",
+        "flagged_24_or_more_snapshots",
+        "still_sff",
+        "now_candidates",
+        "certified_and_no_longer_flagged",
+        "no_longer_in_the_file",
+        "avg_rating_of_former_sff"
+      ]
+    }
+  }
+}

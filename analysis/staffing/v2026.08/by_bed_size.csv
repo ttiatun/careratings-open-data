@@ -1,0 +1,6 @@
+band_order,bed_band,facilities,facilities_with_reported_hours,pct_at_or_above_rn_floor,pct_at_or_above_aide_floor,pct_at_or_above_total_floor,pct_at_or_above_all_three,facilities_at_or_above_all_three,avg_total_nurse_hprd,avg_rn_hprd,avg_aide_hprd
+1,Under 50 beds,1692,1564,84.5,60.4,84.8,52.8,826,4.67,1.19,2.66
+2,50 to 99 beds,5596,5439,59.9,37.6,67.2,24.5,1332,3.88,0.68,2.35
+3,100 to 149 beds,5009,4932,45.4,23.3,57.2,12.8,632,3.68,0.57,2.22
+4,150 to 199 beds,1546,1525,40.9,22.3,58.4,12.8,195,3.69,0.56,2.22
+5,200 beds or more,837,825,50.2,24.0,55.0,15.2,125,3.63,0.63,2.21

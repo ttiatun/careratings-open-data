@@ -1,0 +1,2 @@
+release,facilities,certified_beds,facilities_fined,pct_facilities_fined,fines,fines_per_100_facilities,total_fines_dollars,fines_dollars_per_facility,fines_dollars_per_bed,payment_denials,denials_per_100_facilities,pct_with_any_penalty,sff_or_candidate,abuse_icon_facilities,avg_overall_rating,fine_rows,median_fine_dollars,mean_fine_dollars,earliest_penalty_date,latest_penalty_date
+v2026.08,14690,1567504,6514,44.3,13256,90.2,456752787.0,31093.0,291.0,2440,16.6,46.1,525,1426,2.98,13256,15593.0,34456.0,2023-08-19,2026-07-29

@@ -1,0 +1,3 @@
+chain_status,facilities,certified_beds,facilities_fined,pct_facilities_fined,fines,fines_per_100_facilities,total_fines_dollars,fines_dollars_per_facility,fines_dollars_per_bed,payment_denials,denials_per_100_facilities,pct_with_any_penalty,sff_or_candidate,abuse_icon_facilities,avg_overall_rating
+In a CMS-identified chain,10116,1106891,4689,46.4,9469,93.6,336494489.0,33264.0,304.0,1643,16.2,47.9,352,1033,2.89
+Not in a chain,4574,460613,1825,39.9,3787,82.8,120258298.0,26292.0,261.0,797,17.4,42.2,173,393,3.18

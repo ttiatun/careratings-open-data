@@ -1,0 +1,6 @@
+disclosure_group,facilities,facilities_with_reported_hours,pct_at_or_above_rn_floor,pct_at_or_above_aide_floor,pct_at_or_above_total_floor,pct_at_or_above_all_three,facilities_at_or_above_all_three,avg_total_nurse_hprd,avg_rn_hprd,avg_aide_hprd
+No PE or REIT disclosure,13552,13212,54.9,32.9,64.7,21.6,2860,3.86,0.68,2.32
+PE or REIT among other disclosable parties only,529,524,45.4,17.4,44.7,11.1,58,3.56,0.57,2.12
+No PECOS enrollment matched,475,424,64.9,48.6,67.9,38.4,163,4.23,0.85,2.61
+Discloses a REIT owner,69,67,68.7,31.3,61.2,29.9,20,3.94,0.82,2.28
+Discloses a private-equity owner,65,61,68.9,23.0,62.3,14.8,9,3.84,0.72,2.3

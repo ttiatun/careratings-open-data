@@ -1,0 +1,2 @@
+release,facilities,facilities_with_reported_hours,pct_at_or_above_rn_floor,pct_at_or_above_aide_floor,pct_at_or_above_total_floor,pct_at_or_above_all_three,facilities_at_or_above_all_three,avg_total_nurse_hprd,avg_rn_hprd,avg_aide_hprd,avg_lpn_hprd,avg_weekend_total_nurse_hprd,avg_total_nurse_turnover_pct,avg_rn_turnover_pct,rn_floor,aide_floor,total_floor
+v2026.08,14690,14288,55.0,32.7,64.0,21.8,3110,3.86,0.69,2.32,0.86,3.42,45.8,42.9,0.55,2.45,3.48
