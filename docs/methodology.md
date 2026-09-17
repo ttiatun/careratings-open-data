@@ -187,6 +187,8 @@ CMS publishes the SFF list as a PDF that it overwrites in place, at `cms.gov/Med
 - **Reporting lag and maturity (history store).** `penalties_history` records when each penalty first appeared in a monthly file. `reporting_lag_by_year.csv` gives the days from penalty date to first appearance; the median is six to eight months, so the latest two penalty years are always incomplete. `fines_by_penalty_year.csv` carries that note, and `fines_equal_maturity.csv` counts, for each penalty year, only the fines visible by August 31 of the following year, which is the fair basis for a trend. `fines_in_file_by_snapshot.csv` counts the fines present in each monthly file (first seen on or before, last seen on or after the snapshot).
 - **Special Focus Facilities (history store).** `sff_monthly.csv` counts the SFF and candidate flags in every monthly file; `sff_tenure.csv` counts the monthly files in which each facility carried the SFF flag (era 1 `Y`, later `SFF`) since January 2019 and what became of those facilities in the latest file. A count of monthly files is not a count of months where the archive re-published a vintage (section 9).
 
+Both Phase 6 studies also write `site/<study>.json` (`study_site.py`): the run's own CSV tables as one JSON document, nothing recomputed, which the site's `/data/enforcement/` and `/data/staffing/` pages read from the research store after `tcr-open-data publish-analysis`.
+
 ## 13. Staffing-standards study tables
 
 `tcr-open-data staffing-study --release releases/<release> --history history --out analysis/staffing/<release>` (`staffing_study.py`) writes the tables behind the staffing-standards tracker.

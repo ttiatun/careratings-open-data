@@ -41,6 +41,7 @@ import duckdb
 
 from . import __version__
 from .ownership_study import DISCLOSURE_GROUP, _q, _run, _write_csv
+from .study_site import write_study_site
 
 RN_FLOOR = 0.55
 AIDE_FLOOR = 2.45
@@ -155,6 +156,9 @@ def run_study(release_dir: Path, out_dir: Path, history_dir: Path | None = None)
 
     summary = _summary(release, manifest, con, out_dir, ctx["has_history"])
     (out_dir / "summary.md").write_text(summary, encoding="utf-8")
+    write_study_site("staffing", out_dir, manifest, list(results), extra={"small_state_threshold": SMALL_STATE, "history_store": ctx["has_history"],
+                                                                       "floors": {"rn": RN_FLOOR, "aide": AIDE_FLOOR, "total": TOTAL_FLOOR}})
+    results["site/staffing"] = {"rows": 1, "columns": ["staffing.json"]}
     meta = {"study": "staffing", "release": release, "built_at": datetime.now(timezone.utc).isoformat(), "builder": {"name": "tcr-open-data", "version": __version__},
             "processing_date": manifest.get("processing_date"), "doi": manifest.get("doi"), "history_store": ctx["has_history"],
             "floors": {"rn": RN_FLOOR, "aide": AIDE_FLOOR, "total": TOTAL_FLOOR}, "tables": results}

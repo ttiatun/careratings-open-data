@@ -1,7 +1,7 @@
 {
   "study": "enforcement",
   "release": "v2026.08",
-  "built_at": "2026-09-17T03:10:33.023856+00:00",
+  "built_at": "2026-09-17T17:48:26.827698+00:00",
   "builder": {
     "name": "tcr-open-data",
     "version": "0.1.0"
@@ -260,6 +260,12 @@
         "certified_and_no_longer_flagged",
         "no_longer_in_the_file",
         "avg_rating_of_former_sff"
+      ]
+    },
+    "site/enforcement": {
+      "rows": 1,
+      "columns": [
+        "enforcement.json"
       ]
     }
   }
