@@ -14,6 +14,11 @@ First release built by `tcr-open-data` 0.1.0. Archived at Zenodo: DOI 10.5281/ze
 
 - Initial build pipeline: exact header guards for every CMS file, DuckDB projections, schema-driven typing, validation against the national row of the CMS chain file, manifests with SHA-256 checksums, generated codebook, and R2 publishing.
 
+## Enforcement and staffing study tables (September 2026)
+
+- `tcr-open-data enforcement-study`: fines and payment denials by state, ownership, disclosure group and chain, fine sizes, concentration of fine dollars, and, from the history store, the reporting lag, the trend at equal maturity, fines present in each monthly file and Special Focus Facility tenure. The Penalties file has no per-instance flag and nothing here infers one.
+- `tcr-open-data staffing-study`: the share of facilities reporting hours at or above the rescinded federal floors (0.55 RN, 2.45 aide, 3.48 total), by state, ownership, chain, rating and size, with the monthly trend since 2019. Reported hours, not case-mix adjusted; the 24/7 RN requirement is not tested.
+
 ## Ownership study tables (September 16, 2026)
 
 - `tcr-open-data ownership-study`: the descriptive tables behind the ownership report from a release and the history store, committed under `analysis/ownership/<release>/` with `summary.md` and `study.json`.

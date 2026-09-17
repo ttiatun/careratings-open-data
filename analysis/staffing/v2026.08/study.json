@@ -1,0 +1,200 @@
+{
+  "study": "staffing",
+  "release": "v2026.08",
+  "built_at": "2026-09-17T03:10:33.748529+00:00",
+  "builder": {
+    "name": "tcr-open-data",
+    "version": "0.1.0"
+  },
+  "processing_date": "2026-08-01",
+  "doi": "10.5281/zenodo.22780105",
+  "history_store": true,
+  "floors": {
+    "rn": 0.55,
+    "aide": 2.45,
+    "total": 3.48
+  },
+  "tables": {
+    "national_summary": {
+      "rows": 1,
+      "columns": [
+        "release",
+        "facilities",
+        "facilities_with_reported_hours",
+        "pct_at_or_above_rn_floor",
+        "pct_at_or_above_aide_floor",
+        "pct_at_or_above_total_floor",
+        "pct_at_or_above_all_three",
+        "facilities_at_or_above_all_three",
+        "avg_total_nurse_hprd",
+        "avg_rn_hprd",
+        "avg_aide_hprd",
+        "avg_lpn_hprd",
+        "avg_weekend_total_nurse_hprd",
+        "avg_total_nurse_turnover_pct",
+        "avg_rn_turnover_pct",
+        "rn_floor",
+        "aide_floor",
+        "total_floor"
+      ]
+    },
+    "by_state": {
+      "rows": 53,
+      "columns": [
+        "state",
+        "facilities",
+        "facilities_with_reported_hours",
+        "pct_at_or_above_rn_floor",
+        "pct_at_or_above_aide_floor",
+        "pct_at_or_above_total_floor",
+        "pct_at_or_above_all_three",
+        "facilities_at_or_above_all_three",
+        "avg_total_nurse_hprd",
+        "avg_rn_hprd",
+        "avg_aide_hprd",
+        "suppressed"
+      ]
+    },
+    "by_ownership": {
+      "rows": 3,
+      "columns": [
+        "ownership_category",
+        "facilities",
+        "facilities_with_reported_hours",
+        "pct_at_or_above_rn_floor",
+        "pct_at_or_above_aide_floor",
+        "pct_at_or_above_total_floor",
+        "pct_at_or_above_all_three",
+        "facilities_at_or_above_all_three",
+        "avg_total_nurse_hprd",
+        "avg_rn_hprd",
+        "avg_aide_hprd"
+      ]
+    },
+    "by_chain_status": {
+      "rows": 2,
+      "columns": [
+        "chain_status",
+        "facilities",
+        "facilities_with_reported_hours",
+        "pct_at_or_above_rn_floor",
+        "pct_at_or_above_aide_floor",
+        "pct_at_or_above_total_floor",
+        "pct_at_or_above_all_three",
+        "facilities_at_or_above_all_three",
+        "avg_total_nurse_hprd",
+        "avg_rn_hprd",
+        "avg_aide_hprd"
+      ]
+    },
+    "by_disclosure_group": {
+      "rows": 5,
+      "columns": [
+        "disclosure_group",
+        "facilities",
+        "facilities_with_reported_hours",
+        "pct_at_or_above_rn_floor",
+        "pct_at_or_above_aide_floor",
+        "pct_at_or_above_total_floor",
+        "pct_at_or_above_all_three",
+        "facilities_at_or_above_all_three",
+        "avg_total_nurse_hprd",
+        "avg_rn_hprd",
+        "avg_aide_hprd"
+      ]
+    },
+    "by_overall_rating": {
+      "rows": 5,
+      "columns": [
+        "overall_rating",
+        "facilities",
+        "facilities_with_reported_hours",
+        "pct_at_or_above_rn_floor",
+        "pct_at_or_above_aide_floor",
+        "pct_at_or_above_total_floor",
+        "pct_at_or_above_all_three",
+        "facilities_at_or_above_all_three",
+        "avg_total_nurse_hprd",
+        "avg_rn_hprd",
+        "avg_aide_hprd"
+      ]
+    },
+    "by_bed_size": {
+      "rows": 5,
+      "columns": [
+        "band_order",
+        "bed_band",
+        "facilities",
+        "facilities_with_reported_hours",
+        "pct_at_or_above_rn_floor",
+        "pct_at_or_above_aide_floor",
+        "pct_at_or_above_total_floor",
+        "pct_at_or_above_all_three",
+        "facilities_at_or_above_all_three",
+        "avg_total_nurse_hprd",
+        "avg_rn_hprd",
+        "avg_aide_hprd"
+      ]
+    },
+    "distance_to_total_floor": {
+      "rows": 8,
+      "columns": [
+        "band_order",
+        "distance_from_total_floor",
+        "facilities",
+        "pct_of_facilities"
+      ]
+    },
+    "trend_by_snapshot": {
+      "rows": 89,
+      "columns": [
+        "snapshot_date",
+        "cms_vintage",
+        "facilities",
+        "facilities_with_reported_hours",
+        "pct_at_or_above_rn_floor",
+        "pct_at_or_above_aide_floor",
+        "pct_at_or_above_total_floor",
+        "pct_at_or_above_all_three",
+        "facilities_at_or_above_all_three",
+        "avg_total_nurse_hprd",
+        "avg_rn_hprd",
+        "avg_aide_hprd"
+      ]
+    },
+    "trend_by_ownership_year": {
+      "rows": 25,
+      "columns": [
+        "snapshot_year",
+        "snapshot_date",
+        "ownership_category",
+        "facilities",
+        "facilities_with_reported_hours",
+        "pct_at_or_above_rn_floor",
+        "pct_at_or_above_aide_floor",
+        "pct_at_or_above_total_floor",
+        "pct_at_or_above_all_three",
+        "facilities_at_or_above_all_three",
+        "avg_total_nurse_hprd",
+        "avg_rn_hprd",
+        "avg_aide_hprd"
+      ]
+    },
+    "state_change": {
+      "rows": 53,
+      "columns": [
+        "state",
+        "first_snapshot",
+        "facilities_first",
+        "pct_all_three_first",
+        "avg_total_first",
+        "latest_snapshot",
+        "facilities_latest",
+        "pct_all_three_latest",
+        "avg_total_latest",
+        "change_in_pct_all_three",
+        "suppressed"
+      ]
+    }
+  }
+}

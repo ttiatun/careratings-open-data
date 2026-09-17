@@ -1,0 +1,6 @@
+overall_rating,facilities,facilities_with_reported_hours,pct_at_or_above_rn_floor,pct_at_or_above_aide_floor,pct_at_or_above_total_floor,pct_at_or_above_all_three,facilities_at_or_above_all_three,avg_total_nurse_hprd,avg_rn_hprd,avg_aide_hprd
+1,3015,2875,35.6,20.6,43.8,8.8,254,3.48,0.51,2.13
+2,2962,2885,48.5,25.3,56.7,13.9,400,3.68,0.6,2.22
+3,2820,2751,53.5,30.4,63.2,18.4,506,3.8,0.64,2.3
+4,2785,2727,60.1,35.3,71.2,24.1,656,3.94,0.71,2.36
+5,2981,2951,76.8,51.6,84.7,43.2,1275,4.4,0.97,2.57

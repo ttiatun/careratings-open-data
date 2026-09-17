@@ -15,6 +15,8 @@ Command line: download, build, validate, publish, or run the whole release.
     tcr-open-data cors [--live]                             # apply infra/r2-cors.json (GET/HEAD only)
     tcr-open-data doi --release releases/v2026.08 [--sandbox] [--publish] [--concept-record-id N]
     tcr-open-data ownership-study --release releases/v2026.08 [--history history] --out analysis/ownership/v2026.08
+    tcr-open-data enforcement-study --release releases/v2026.08 [--history history] --out analysis/enforcement/v2026.08
+    tcr-open-data staffing-study --release releases/v2026.08 [--history history] --out analysis/staffing/v2026.08
     tcr-open-data publish-analysis --dir analysis/ownership/v2026.08 [--live]
 """
 
@@ -31,7 +33,9 @@ from .codebook import render_codebook
 from .download import download_all, load_sources_json
 from .history import backfill, consolidate, list_snapshots, reharmonize
 from .manifest import write_release_manifest
+from .enforcement_study import run_study as run_enforcement_study
 from .ownership_study import run_study
+from .staffing_study import run_study as run_staffing_study
 from .sff import Capture, build_sff_history, fetch_capture, list_captures
 from .storage import R2Config, publish, publish_analysis, publish_history, put_cors, retag_objects
 from .validate import validate_release
@@ -170,6 +174,22 @@ def cmd_publish_history(args: argparse.Namespace) -> int:
     return 0
 
 
+def _study_summary(meta: dict) -> str:
+    return json.dumps({"study": meta.get("study"), "release": meta["release"], "history_store": meta["history_store"], "tables": {k: v.get("rows") for k, v in meta["tables"].items()}}, indent=2)
+
+
+def cmd_enforcement_study(args: argparse.Namespace) -> int:
+    history = Path(args.history) if args.history and Path(args.history).exists() else None
+    print(_study_summary(run_enforcement_study(Path(args.release), Path(args.out), history_dir=history, top_n=args.top, min_chain=args.min_chain)))
+    return 0
+
+
+def cmd_staffing_study(args: argparse.Namespace) -> int:
+    history = Path(args.history) if args.history and Path(args.history).exists() else None
+    print(_study_summary(run_staffing_study(Path(args.release), Path(args.out), history_dir=history)))
+    return 0
+
+
 def cmd_publish_analysis(args: argparse.Namespace) -> int:
     summary = publish_analysis(Path(args.dir), dry_run=not args.live, config=R2Config.from_env())
     print(json.dumps(summary, indent=2))
@@ -284,6 +304,20 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--history", default="history")
     p.add_argument("--live", action="store_true")
     p.set_defaults(func=cmd_publish_history)
+
+    p = sub.add_parser("enforcement-study", help="Write the descriptive tables behind the enforcement brief from a release (and the history store if present)")
+    p.add_argument("--release", required=True)
+    p.add_argument("--history", default="history")
+    p.add_argument("--out", required=True)
+    p.add_argument("--top", type=int, default=25, help="Rows in the top-N tables")
+    p.add_argument("--min-chain", type=int, default=20, help="Smallest chain listed in the chain table")
+    p.set_defaults(func=cmd_enforcement_study)
+
+    p = sub.add_parser("staffing-study", help="Write the descriptive tables behind the staffing-standards tracker from a release (and the history store if present)")
+    p.add_argument("--release", required=True)
+    p.add_argument("--history", default="history")
+    p.add_argument("--out", required=True)
+    p.set_defaults(func=cmd_staffing_study)
 
     p = sub.add_parser("publish-analysis", help="Upload one study run (analysis/<study>/<release>/) to R2 and point analysis/<study>/latest.json at it (dry run unless --live)")
     p.add_argument("--dir", required=True, help="Study run directory, e.g. analysis/ownership/v2026.08")

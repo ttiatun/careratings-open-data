@@ -1,0 +1,4 @@
+ownership_category,facilities,facilities_with_reported_hours,pct_at_or_above_rn_floor,pct_at_or_above_aide_floor,pct_at_or_above_total_floor,pct_at_or_above_all_three,facilities_at_or_above_all_three,avg_total_nurse_hprd,avg_rn_hprd,avg_aide_hprd
+For profit,10877,10643,48.5,24.6,57.9,13.0,1385,3.69,0.61,2.21
+Non profit,2868,2752,78.0,58.0,85.4,49.0,1348,4.4,0.94,2.63
+Government,945,893,61.7,51.7,70.3,42.2,377,4.28,0.83,2.63

@@ -1,0 +1,9 @@
+band_order,distance_from_total_floor,facilities,pct_of_facilities
+1,More than 1.00 hours below,167,1.2
+2,0.50 to 1.00 hours below,838,5.9
+3,0.25 to 0.50 hours below,1585,11.1
+4,Less than 0.25 hours below,2553,17.9
+5,At the floor to 0.25 hours above,2470,17.3
+6,0.25 to 0.50 hours above,1864,13.0
+7,0.50 to 1.00 hours above,2448,17.1
+8,More than 1.00 hours above,2363,16.5

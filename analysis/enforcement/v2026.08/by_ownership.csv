@@ -1,0 +1,4 @@
+ownership_category,facilities,certified_beds,facilities_fined,pct_facilities_fined,fines,fines_per_100_facilities,total_fines_dollars,fines_dollars_per_facility,fines_dollars_per_bed,payment_denials,denials_per_100_facilities,pct_with_any_penalty,sff_or_candidate,abuse_icon_facilities,avg_overall_rating
+For profit,10877,1205469,5116,47.0,10694,98.3,383553056.0,35263.0,318.0,1997,18.4,48.7,464,1159,2.8
+Non profit,2868,256793,1016,35.4,1850,64.5,51503738.0,17958.0,201.0,315,11.0,37.5,39,164,3.57
+Government,945,105242,382,40.4,712,75.3,21695993.0,22959.0,206.0,128,13.5,42.9,22,103,3.3
