@@ -40,6 +40,9 @@ def test_staffing_tables(release, tmp_path: Path):
     summary = (out / "summary.md").read_text(encoding="utf-8")
     assert "rescinded effective February 2, 2026" in summary and "24/7 RN requirement is not tested" in summary
     assert "trend_by_snapshot" not in json.loads((out / "study.json").read_text(encoding="utf-8"))["tables"]
+    cuts = (out / "press" / "state_cuts.md").read_text(encoding="utf-8")
+    assert cuts.startswith("# State cuts:") and "At or above all three floors" in cuts or "fewer than 10" in cuts
+    assert cuts.count("\n## ") == len(states)
     site = json.loads((out / "site" / "staffing.json").read_text(encoding="utf-8"))
     assert site["study"] == "staffing" and site["floors"] == {"rn": 0.55, "aide": 2.45, "total": 3.48}
     assert site["tables"]["national_summary"][0]["facilities"] == int(national["facilities"])

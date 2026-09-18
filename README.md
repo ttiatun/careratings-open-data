@@ -95,6 +95,8 @@ tcr-open-data enforcement-study --release releases/v2026.08 --history history --
 tcr-open-data staffing-study --release releases/v2026.08 --history history --out analysis/staffing/v2026.08
 ```
 
+`analysis/staffing/state_standards.json` is the hand-curated table of state minimum staffing standards (methodology section 14); `tcr-open-data verify-standards` re-checks every entry against the legal text.
+
 `analysis/ownership/v2026.08/summary.md` carries the headline numbers and the caveats; section 11 of the methodology describes every table. For press: [docs/press/reporters-guide.md](docs/press/reporters-guide.md) and the per-state cuts in `analysis/ownership/v2026.08/press/state_cuts.md`. The ownership figures are *as disclosed to CMS* (see below), and the Care Compare turnover series breaks in 2025 when CMS changed its role labels and the fuller disclosures under the 2023 ownership rule arrived (methodology, *Care Compare role labels*).
 
 ## What this data is not

@@ -36,6 +36,7 @@ from .manifest import write_release_manifest
 from .enforcement_study import run_study as run_enforcement_study
 from .ownership_study import run_study
 from .staffing_study import run_study as run_staffing_study
+from .state_standards import load as load_standards, validate as validate_standards, verify_online
 from .sff import Capture, build_sff_history, fetch_capture, list_captures
 from .storage import R2Config, publish, publish_analysis, publish_history, put_cors, retag_objects
 from .validate import validate_release
@@ -190,6 +191,21 @@ def cmd_staffing_study(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_verify_standards(args: argparse.Namespace) -> int:
+    table = load_standards(Path(args.file))
+    problems = validate_standards(table)
+    if problems:
+        print(json.dumps({"valid": False, "problems": problems}, indent=2))
+        return 1
+    if args.offline:
+        print(json.dumps({"valid": True, "entries": len(table["entries"])}, indent=2))
+        return 0
+    results = verify_online(table, states=[s.upper() for s in args.state] or None)
+    failed = [r for r in results if not r["ok"]]
+    print(json.dumps({"valid": True, "checked": len(results), "ok": len(results) - len(failed), "failed": failed}, indent=2))
+    return 1 if failed else 0
+
+
 def cmd_publish_analysis(args: argparse.Namespace) -> int:
     summary = publish_analysis(Path(args.dir), dry_run=not args.live, config=R2Config.from_env())
     print(json.dumps(summary, indent=2))
@@ -318,6 +334,12 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--history", default="history")
     p.add_argument("--out", required=True)
     p.set_defaults(func=cmd_staffing_study)
+
+    p = sub.add_parser("verify-standards", help="Validate the state staffing-standards table and re-check every entry's phrases against the legal text online")
+    p.add_argument("--file", default="analysis/staffing/state_standards.json")
+    p.add_argument("--state", action="append", default=[], help="Only these states (repeatable)")
+    p.add_argument("--offline", action="store_true", help="Validate the shape only; fetch nothing")
+    p.set_defaults(func=cmd_verify_standards)
 
     p = sub.add_parser("publish-analysis", help="Upload one study run (analysis/<study>/<release>/) to R2 and point analysis/<study>/latest.json at it (dry run unless --live)")
     p.add_argument("--dir", required=True, help="Study run directory, e.g. analysis/ownership/v2026.08")
